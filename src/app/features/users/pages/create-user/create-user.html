@@ -1,0 +1,85 @@
+<div class="page">
+
+  <mat-card class="card">
+
+    <div class="header">
+      <mat-icon>person_add</mat-icon>
+      <h2>Créer un utilisateur</h2>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+
+      <!-- NOM -->
+      <mat-form-field appearance="outline">
+        <mat-label>Nom complet</mat-label>
+        <input matInput formControlName="nom">
+        <mat-error *ngIf="isInvalid('nom')">
+          Nom obligatoire (min 3 caractères)
+        </mat-error>
+      </mat-form-field>
+
+      <!-- EMAIL -->
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email">
+        <mat-error *ngIf="isInvalid('email')">
+          Email invalide
+        </mat-error>
+      </mat-form-field>
+
+      <!-- PASSWORD -->
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput type="password" formControlName="password">
+        <mat-error *ngIf="isInvalid('password')">
+          Min 6 caractères
+        </mat-error>
+      </mat-form-field>
+
+      <!-- ROLE -->
+      <mat-form-field appearance="outline">
+        <mat-label>Rôle</mat-label>
+        <mat-select formControlName="role">
+          <mat-option *ngFor="let r of roles" [value]="r">
+            {{ r }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="isInvalid('role')">
+          Rôle obligatoire
+        </mat-error>
+      </mat-form-field>
+
+      <!-- BUTTON -->
+      <button mat-raised-button color="primary"
+              type="submit"
+              [disabled]="loading || form.invalid">
+
+        <mat-progress-spinner
+          *ngIf="loading"
+          diameter="20"
+          mode="indeterminate">
+        </mat-progress-spinner>
+
+        <span *ngIf="!loading">
+          Créer l'utilisateur
+        </span>
+
+      </button>
+
+      <!-- SUCCESS -->
+      <div class="success" *ngIf="successMsg">
+        <mat-icon>check_circle</mat-icon>
+        {{ successMsg }}
+      </div>
+
+      <!-- ERROR -->
+      <div class="error" *ngIf="errorMsg">
+        <mat-icon>error</mat-icon>
+        {{ errorMsg }}
+      </div>
+
+    </form>
+
+  </mat-card>
+
+</div>
