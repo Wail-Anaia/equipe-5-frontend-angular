@@ -1,0 +1,38 @@
+<mat-nav-list class="sidebar-nav">
+
+      <div class="sidebar-header">
+        <mat-icon>school</mat-icon>
+        <span>Université</span>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Dashboard — tous les rôles -->
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Tableau de bord</span>
+      </a>
+
+      <!-- Gestion utilisateurs — ADMIN uniquement -->
+      @if (auth.isAdmin()) {
+        <mat-divider></mat-divider>
+
+        <a mat-list-item routerLink="/users" routerLinkActive="active-link">
+          <mat-icon matListItemIcon>group</mat-icon>
+          <span matListItemTitle>Utilisateurs</span>
+        </a>
+
+        <a mat-list-item routerLink="/users/create" routerLinkActive="active-link">
+          <mat-icon matListItemIcon>person_add</mat-icon>
+          <span matListItemTitle>Ajouter un utilisateur</span>
+        </a>
+      }
+
+      <mat-divider></mat-divider>
+
+      <a mat-list-item class="logout-item" (click)="auth.logout()">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Déconnexion</span>
+      </a>
+
+    </mat-nav-list>

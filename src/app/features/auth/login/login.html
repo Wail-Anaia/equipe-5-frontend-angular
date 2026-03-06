@@ -1,0 +1,52 @@
+<div class="login-wrapper">
+  <mat-card class="login-card mat-elevation-z8">
+
+    <mat-card-header>
+      <mat-card-title>
+        <span class="university-logo">🎓</span>
+        <span>Université Internationale</span>
+      </mat-card-title>
+      <mat-card-subtitle>Plateforme de gestion des projets étudiants</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off">
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Adresse email</mat-label>
+          <input matInput type="email" formControlName="email"
+                 placeholder="vous@université.ma" autocomplete="email">
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="form.get('email')?.hasError('required')">
+            L'email est obligatoire
+          </mat-error>
+          <mat-error *ngIf="form.get('email')?.hasError('email')">
+            Format d'email invalide
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'"
+                 formControlName="password" autocomplete="current-password">
+          <button mat-icon-button matSuffix type="button"
+                  (click)="hidePassword = !hidePassword">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="form.get('password')?.hasError('required')">
+            Le mot de passe est obligatoire
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit"
+                class="full-width submit-btn"
+                [disabled]="loading || form.invalid">
+          <mat-spinner *ngIf="loading" diameter="20" class="spinner-inline"></mat-spinner>
+          <span>{{ loading ? 'Connexion...' : 'Se connecter' }}</span>
+        </button>
+
+      </form>
+    </mat-card-content>
+
+  </mat-card>
+</div>
