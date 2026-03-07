@@ -1,1 +1,124 @@
-<p>user-list works!</p>
+<div class="user-list">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-header__title">Gestion des utilisateurs</h1>
+      <p class="page-header__sub">{{ total }} compte(s) enregistré(s) sur la plateforme</p>
+    </div>
+    <a class="btn-primary" routerLink="/users/create">
+      <mat-icon>person_add</mat-icon>
+      Créer un compte
+    </a>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input class="search-input" type="text" [(ngModel)]="search"
+             placeholder="Rechercher par nom, email ou rôle...">
+      <button class="search-clear" *ngIf="search" (click)="search = ''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <button class="btn-icon" (click)="loadUsers()" matTooltip="Actualiser">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div class="table-skeleton" *ngIf="loading">
+    <div class="skel-row" *ngFor="let i of [1,2,3,4,5]"></div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Utilisateur</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+          <th>Créé le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+
+          <!-- Utilisateur -->
+          <td class="td-user">
+            <div class="user-cell">
+              <div class="user-avatar" [class.user-avatar--inactive]="!user.actif">
+                {{ getInitials(user.nom) }}
+              </div>
+              <span class="user-name">{{ user.nom }}</span>
+            </div>
+          </td>
+
+          <!-- Email -->
+          <td class="td-email">
+            <a [href]="'mailto:' + user.email" class="email-link">{{ user.email }}</a>
+          </td>
+
+          <!-- Rôle -->
+          <td>
+            <span class="role-badge" [class]="getRoleClass(user.role)">{{ user.role }}</span>
+          </td>
+
+          <!-- Statut -->
+          <td>
+            <span class="status-pill" [class.status-pill--active]="user.actif"
+                                      [class.status-pill--inactive]="!user.actif">
+              <span class="status-dot"></span>
+              {{ user.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </td>
+
+          <!-- Date -->
+          <td class="td-date">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+
+          <!-- Actions -->
+          <td class="td-actions">
+            <button class="action-btn"
+                    [class.action-btn--disable]="user.actif"
+                    [class.action-btn--enable]="!user.actif"
+                    [matTooltip]="user.actif ? 'Désactiver' : 'Activer'"
+                    (click)="toggleStatus(user)">
+              <mat-icon>{{ user.actif ? 'block' : 'check_circle' }}</mat-icon>
+            </button>
+            <button class="action-btn action-btn--view"
+                    matTooltip="Voir le profil">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </td>
+
+        </tr>
+
+        <!-- Empty state -->
+        <tr *ngIf="filteredUsers.length === 0">
+          <td colspan="6" class="empty-cell">
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <span>Aucun utilisateur trouvé</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!loading && totalPages > 1">
+    <button class="page-btn" [disabled]="page === 0" (click)="prevPage()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span class="page-info">Page {{ page + 1 }} / {{ totalPages }}</span>
+    <button class="page-btn" [disabled]="page >= totalPages - 1" (click)="nextPage()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+</div>

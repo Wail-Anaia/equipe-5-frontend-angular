@@ -1,77 +1,200 @@
-<div class="page-container">
-  <mat-card class="form-card mat-elevation-z4">
+<div class="create-user">
 
-    <mat-card-header>
-      <mat-icon mat-card-avatar color="primary">person_add</mat-icon>
-      <mat-card-title>Créer un compte utilisateur</mat-card-title>
-      <mat-card-subtitle>Seul un administrateur peut créer des comptes</mat-card-subtitle>
-    </mat-card-header>
+  <!-- ── Header ──────────────────────────────────────── -->
+  <div class="page-header">
+    <a class="back-link" routerLink="/users">
+      <mat-icon>arrow_back</mat-icon>
+      Retour à la liste
+    </a>
+    <div>
+      <h1 class="page-header__title">Créer un compte utilisateur</h1>
+      <p class="page-header__sub">Remplissez le formulaire pour créer un nouveau compte sur la plateforme</p>
+    </div>
+  </div>
 
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="submit()">
+  <div class="create-layout">
 
-        <!-- Nom -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nom complet</mat-label>
-          <input matInput formControlName="nom" placeholder="Prénom Nom">
-          <mat-icon matSuffix>person</mat-icon>
-          <mat-error *ngIf="isInvalid('nom')">
-            Nom obligatoire (2–100 caractères)
-          </mat-error>
-        </mat-form-field>
+    <!-- ── Form card ─────────────────────────────────── -->
+    <div class="form-card">
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        <!-- Nom complet -->
+        <div class="field-group" [class.field-group--error]="isInvalid('nom')">
+          <label class="field-label" for="nom">
+            <mat-icon>person</mat-icon>
+            Nom complet
+          </label>
+          <div class="field-input-wrap">
+            <input id="nom"
+                   type="text"
+                   formControlName="nom"
+                   class="field-input"
+                   placeholder="Prénom Nom"
+                   autocomplete="name">
+          </div>
+          <span class="field-error" *ngIf="isInvalid('nom')">{{ getError('nom') }}</span>
+        </div>
 
         <!-- Email -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Adresse email</mat-label>
-          <input matInput type="email" formControlName="email"
-                 placeholder="utilisateur@université.ma">
-          <mat-icon matSuffix>email</mat-icon>
-          <mat-error *ngIf="isInvalid('email')">
-            Adresse email invalide
-          </mat-error>
-        </mat-form-field>
+        <div class="field-group" [class.field-group--error]="isInvalid('email')">
+          <label class="field-label" for="email">
+            <mat-icon>alternate_email</mat-icon>
+            Adresse email
+          </label>
+          <div class="field-input-wrap">
+            <input id="email"
+                   type="email"
+                   formControlName="email"
+                   class="field-input"
+                   placeholder="utilisateur@université.ma"
+                   autocomplete="email">
+          </div>
+          <span class="field-error" *ngIf="isInvalid('email')">{{ getError('email') }}</span>
+        </div>
 
         <!-- Mot de passe -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Mot de passe</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'"
-                 formControlName="password" placeholder="Minimum 6 caractères">
-          <button mat-icon-button matSuffix type="button"
-                  (click)="hidePassword = !hidePassword">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          <mat-hint>Au moins 6 caractères</mat-hint>
-          <mat-error *ngIf="isInvalid('password')">
-            Mot de passe requis (min. 6 caractères)
-          </mat-error>
-        </mat-form-field>
+        <div class="field-group" [class.field-group--error]="isInvalid('password')">
+          <label class="field-label" for="password">
+            <mat-icon>lock_outline</mat-icon>
+            Mot de passe
+          </label>
+          <div class="field-input-wrap field-input-wrap--with-toggle">
+            <input id="password"
+                   [type]="hidePassword ? 'password' : 'text'"
+                   formControlName="password"
+                   class="field-input"
+                   placeholder="Minimum 6 caractères"
+                   autocomplete="new-password">
+            <button type="button" class="field-toggle" (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="hidePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
 
-        <!-- Rôle -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Rôle</mat-label>
-          <mat-select formControlName="role">
-            @for (role of roles; track role) {
-              <mat-option [value]="role">{{ role }}</mat-option>
-            }
-          </mat-select>
-          <mat-error *ngIf="isInvalid('role')">
-            Sélection du rôle obligatoire
-          </mat-error>
-        </mat-form-field>
+          <!-- Indicateur de force -->
+          <div class="strength-wrap" *ngIf="form.get('password')?.value">
+            <div class="strength-bars">
+              <div class="strength-bar"
+                   *ngFor="let i of [1,2,3,4,5]"
+                   [class.strength-bar--filled]="passwordStrength >= i"
+                   [ngClass]="passwordStrength >= i ? passwordStrengthClass : ''">
+              </div>
+            </div>
+            <span class="strength-label" [ngClass]="passwordStrengthClass">
+              {{ passwordStrengthLabel }}
+            </span>
+          </div>
 
-        <!-- Submit -->
-        <div class="actions">
-          <button mat-raised-button color="primary" type="submit"
-                  [disabled]="loading || form.invalid">
-            @if (loading) {
-              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
-            }
-            {{ loading ? 'Création en cours...' : 'Créer le compte' }}
+          <span class="field-error" *ngIf="isInvalid('password')">{{ getError('password') }}</span>
+        </div>
+
+        <!-- Rôle — card selector -->
+        <div class="field-group">
+          <label class="field-label">
+            <mat-icon>manage_accounts</mat-icon>
+            Rôle
+          </label>
+          <div class="role-selector">
+            <div class="role-option"
+                 *ngFor="let r of roles"
+                 [class.role-option--selected]="form.get('role')?.value === r.value"
+                 (click)="selectRole(r.value)"
+                 [attr.aria-pressed]="form.get('role')?.value === r.value"
+                 role="button"
+                 tabindex="0"
+                 (keydown.enter)="selectRole(r.value)"
+                 (keydown.space)="selectRole(r.value)">
+              <div class="role-option__icon">
+                <mat-icon>{{ r.icon }}</mat-icon>
+              </div>
+              <div class="role-option__body">
+                <span class="role-option__name">{{ r.label }}</span>
+                <span class="role-option__desc">{{ r.desc }}</span>
+              </div>
+              <div class="role-option__check" *ngIf="form.get('role')?.value === r.value">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+            </div>
+          </div>
+          <span class="field-error" *ngIf="isInvalid('role')">{{ getError('role') }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <a class="btn-cancel" routerLink="/users">Annuler</a>
+          <button type="submit"
+                  class="btn-submit"
+                  [class.btn-submit--loading]="loading"
+                  [disabled]="loading">
+            <span class="btn-spinner" *ngIf="loading">
+              <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10"
+                        stroke="rgba(255,255,255,0.3)"
+                        stroke-width="3"/>
+                <path d="M12 2a10 10 0 0 1 10 10"
+                      stroke="white"
+                      stroke-width="3"
+                      stroke-linecap="round"/>
+              </svg>
+            </span>
+            <mat-icon *ngIf="!loading">person_add</mat-icon>
+            {{ loading ? 'Création en cours…' : 'Créer le compte' }}
           </button>
         </div>
 
       </form>
-    </mat-card-content>
+    </div>
 
-  </mat-card>
+    <!-- ── Info panel ─────────────────────────────────── -->
+    <aside class="info-panel">
+
+      <div class="info-card">
+        <div class="info-card__icon">
+          <mat-icon>security</mat-icon>
+        </div>
+        <h3 class="info-card__title">Sécurité</h3>
+        <p class="info-card__text">
+          Le mot de passe est haché avec BCrypt avant d'être stocké.
+          Il n'est jamais conservé en clair dans la base de données.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card__icon info-card__icon--green">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h3 class="info-card__title">Compte actif par défaut</h3>
+        <p class="info-card__text">
+          Le compte est créé avec le statut actif. Vous pouvez le désactiver
+          à tout moment depuis la liste des utilisateurs.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card__icon info-card__icon--amber">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <h3 class="info-card__title">Traçabilité</h3>
+        <p class="info-card__text">
+          Cette action est enregistrée dans le journal d'audit
+          (USER_CREATED) avec horodatage et identifiant de l'administrateur.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card__icon info-card__icon--violet">
+          <mat-icon>manage_accounts</mat-icon>
+        </div>
+        <h3 class="info-card__title">Droits par rôle</h3>
+        <ul class="info-card__list">
+          <li><strong>Étudiant</strong> — projets &amp; documents personnels</li>
+          <li><strong>Encadrant</strong> — supervision de projets</li>
+          <li><strong>Admin</strong> — accès complet à la plateforme</li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </div>
 </div>

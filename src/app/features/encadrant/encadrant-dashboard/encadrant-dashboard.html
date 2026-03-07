@@ -1,0 +1,99 @@
+<div class="encadrant-dash">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-header__title">Espace Encadrant</h1>
+      <p class="page-header__sub">Gérez vos projets et suivez vos étudiants</p>
+    </div>
+    <div class="header-stats" *ngIf="!loading && stats">
+      <div class="header-stat">
+        <span class="header-stat__value">{{ stats.supervisedProjects.length }}</span>
+        <span class="header-stat__label">projets encadrés</span>
+      </div>
+      <div class="header-stat">
+        <span class="header-stat__value">{{ stats.followedStudents.length }}</span>
+        <span class="header-stat__label">étudiants suivis</span>
+      </div>
+      <div class="header-stat header-stat--warn" *ngIf="stats.pendingReviews > 0">
+        <span class="header-stat__value">{{ stats.pendingReviews }}</span>
+        <span class="header-stat__label">en attente de révision</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="skeleton-grid" *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let i of [1,2]"></div>
+  </div>
+
+  <!-- Content grid -->
+  <div class="main-grid" *ngIf="!loading && stats">
+
+    <!-- Projets encadrés -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__header-left">
+          <div class="card__icon card__icon--indigo">
+            <mat-icon>supervised_user_circle</mat-icon>
+          </div>
+          <h2 class="card__title">Projets encadrés</h2>
+        </div>
+        <span class="card__count">{{ stats.supervisedProjects.length }}</span>
+      </div>
+
+      <div class="project-table">
+        <div class="project-row project-row--header">
+          <span>Projet</span>
+          <span>Statut</span>
+          <span>Dernière MÀJ</span>
+        </div>
+        <a class="project-row"
+           *ngFor="let p of stats.supervisedProjects"
+           [routerLink]="['/supervised', p.id]">
+          <div class="project-name-cell">
+            <div class="project-dot"></div>
+            <span>{{ p.titre }}</span>
+          </div>
+          <span class="status-badge" [class]="getStatutClass(p.statut)">
+            {{ getStatutLabel(p.statut) }}
+          </span>
+          <span class="project-date">{{ p.updatedAt | date:'dd/MM/yyyy' }}</span>
+        </a>
+      </div>
+
+      <a routerLink="/supervised" class="card__footer-link">
+        <mat-icon>arrow_forward</mat-icon>
+        Voir tous les projets
+      </a>
+    </section>
+
+    <!-- Étudiants suivis -->
+    <section class="card">
+      <div class="card__header">
+        <div class="card__header-left">
+          <div class="card__icon card__icon--emerald">
+            <mat-icon>group</mat-icon>
+          </div>
+          <h2 class="card__title">Étudiants suivis</h2>
+        </div>
+        <span class="card__count">{{ stats.followedStudents.length }}</span>
+      </div>
+
+      <div class="student-list">
+        <div class="student-item" *ngFor="let s of stats.followedStudents">
+          <div class="student-avatar">{{ getInitials(s.nom) }}</div>
+          <div class="student-body">
+            <span class="student-name">{{ s.nom }}</span>
+            <span class="student-project">{{ s.projet }}</span>
+          </div>
+          <a class="student-contact" [href]="'mailto:' + s.email" matTooltip="Contacter">
+            <mat-icon>email</mat-icon>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</div>

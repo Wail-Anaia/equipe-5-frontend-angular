@@ -1,0 +1,99 @@
+<header class="navbar">
+
+  <!-- Left: hamburger + breadcrumb -->
+  <div class="navbar__left">
+    <button class="navbar__menu-btn" (click)="menuToggle.emit()" aria-label="Toggle sidebar">
+      <mat-icon>{{ sidebarCollapsed ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
+    <div class="navbar__title">
+      <span class="navbar__title-text">{{ pageTitle }}</span>
+      <span class="navbar__breadcrumb">UniPFE / {{ pageTitle }}</span>
+    </div>
+  </div>
+
+  <!-- Right: actions + user -->
+  <div class="navbar__right">
+
+    <!-- Notifications -->
+    <button class="navbar__icon-btn"
+            [matBadge]="notificationsCount"
+            matBadgeColor="warn"
+            matBadgeSize="small"
+            [matBadgeHidden]="notificationsCount === 0"
+            matTooltip="Notifications"
+            [matMenuTriggerFor]="notifMenu">
+      <mat-icon>notifications_none</mat-icon>
+    </button>
+
+    <mat-menu #notifMenu="matMenu" class="notif-menu">
+      <div class="notif-header">
+        <span>Notifications</span>
+        <span class="notif-count">{{ notificationsCount }} nouvelles</span>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="notif-item">
+        <mat-icon color="primary">person_add</mat-icon>
+        <div class="notif-body">
+          <span class="notif-text">Nouveau compte créé</span>
+          <span class="notif-time">il y a 5 min</span>
+        </div>
+      </div>
+      <div class="notif-item">
+        <mat-icon style="color: #34d399">folder_special</mat-icon>
+        <div class="notif-body">
+          <span class="notif-text">Projet soumis pour validation</span>
+          <span class="notif-time">il y a 1h</span>
+        </div>
+      </div>
+      <div class="notif-item">
+        <mat-icon style="color: #f59e0b">assignment_late</mat-icon>
+        <div class="notif-body">
+          <span class="notif-text">Rapport en attente de révision</span>
+          <span class="notif-time">il y a 3h</span>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-button class="notif-all">Voir toutes les notifications</button>
+    </mat-menu>
+
+    <!-- Separator -->
+    <div class="navbar__separator"></div>
+
+    <!-- User menu -->
+    <button class="navbar__user-btn" [matMenuTriggerFor]="userMenu">
+      <div class="navbar__avatar">{{ getInitials() }}</div>
+      <div class="navbar__user-info">
+        <span class="navbar__user-name">{{ auth.userName() }}</span>
+        <span class="navbar__user-role" [style.color]="getRoleColor()">
+          {{ getRoleLabel() }}
+        </span>
+      </div>
+      <mat-icon class="navbar__caret">expand_more</mat-icon>
+    </button>
+
+    <mat-menu #userMenu="matMenu" class="user-menu">
+      <div class="user-menu-header">
+        <div class="user-menu-avatar">{{ getInitials() }}</div>
+        <div>
+          <div class="user-menu-name">{{ auth.userName() }}</div>
+          <div class="user-menu-email">{{ auth.user()?.email }}</div>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/profile">
+        <mat-icon>account_circle</mat-icon>
+        Mon profil
+      </button>
+      <button mat-menu-item routerLink="/settings">
+        <mat-icon>settings</mat-icon>
+        Paramètres
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item class="logout-menu-item" (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        Déconnexion
+      </button>
+    </mat-menu>
+
+  </div>
+</header>

@@ -1,38 +1,42 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { MatCardModule }       from '@angular/material/card';
-import { MatFormFieldModule }  from '@angular/material/form-field';
-import { MatInputModule }      from '@angular/material/input';
-import { MatSelectModule }     from '@angular/material/select';
-import { MatButtonModule }     from '@angular/material/button';
-import { MatIconModule }       from '@angular/material/icon';
+import { MatIconModule }                from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Role, CreateUserRequest, UserResponse } from '../../../core/auth/auth.model';
+
+type Role = 'ADMIN' | 'ENCADRANT' | 'ETUDIANT';
 
 @Component({
   selector: 'app-create-user',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule,
-    MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    MatIconModule,
+    MatSnackBarModule
   ],
   templateUrl: './create-user.html',
-  styleUrl: './create-user.scss'
+  styleUrls: ['./create-user.scss']
 })
 export class CreateUser {
 
-  private fb    = inject(FormBuilder);
-  private http  = inject(HttpClient);
-  private snack = inject(MatSnackBar);
+  private fb     = inject(FormBuilder);
+  private http   = inject(HttpClient);
+  private router = inject(Router);
+  private snack  = inject(MatSnackBar);
 
   loading      = false;
   hidePassword = true;
+  submitted    = false;
 
-  readonly roles: Role[] = ['ADMIN', 'ENCADRANT', 'ETUDIANT'];
+  readonly roles: { value: Role; label: string; icon: string; desc: string }[] = [
+    { value: 'ETUDIANT',  label: 'Étudiant',   icon: 'school',               desc: 'Accès limité à ses projets et documents' },
+    { value: 'ENCADRANT', label: 'Encadrant',  icon: 'supervisor_account',   desc: 'Encadre et suit les projets étudiants'   },
+    { value: 'ADMIN',     label: 'Admin',      icon: 'admin_panel_settings', desc: 'Accès complet à la plateforme'           },
+  ];
 
   form = this.fb.nonNullable.group({
     nom:      ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -42,32 +46,75 @@ export class CreateUser {
   });
 
   submit(): void {
+    this.submitted = true;
     if (this.form.invalid || this.loading) return;
 
     this.loading = true;
-    const payload: CreateUserRequest = this.form.getRawValue();
 
-    this.http.post<UserResponse>('/api/users', payload).subscribe({
-      next: (user) => {
+    this.http.post('/api/users', this.form.getRawValue()).subscribe({
+      next: (user: any) => {
         this.loading = false;
         this.snack.open(
-          `Compte créé pour ${user.nom} (${user.role})`,
-          'Fermer', { duration: 5000, panelClass: 'snack-success' }
+          `✅ Compte créé pour ${user?.nom ?? this.form.value.nom}`,
+          'Fermer',
+          { duration: 5000, panelClass: 'snack-success', horizontalPosition: 'center', verticalPosition: 'top' }
         );
-        this.form.reset({ role: 'ETUDIANT' });
+        this.router.navigate(['/users']);
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
         const msg = err.error?.error
           ?? Object.values(err.error?.details ?? {}).join(' | ')
           ?? 'Erreur lors de la création.';
-        this.snack.open(msg, 'Fermer', { duration: 5000, panelClass: 'snack-error' });
+        this.snack.open(msg, 'Fermer', {
+          duration: 5000, panelClass: 'snack-error',
+          horizontalPosition: 'center', verticalPosition: 'top'
+        });
       }
     });
   }
 
   isInvalid(field: string): boolean {
     const ctrl = this.form.get(field);
-    return !!(ctrl?.invalid && ctrl?.touched);
+    return !!(ctrl?.invalid && (ctrl?.touched || this.submitted));
+  }
+
+  getError(field: string): string {
+    const ctrl = this.form.get(field);
+    if (!ctrl?.errors) return '';
+    if (ctrl.errors['required'])  return 'Ce champ est obligatoire';
+    if (ctrl.errors['email'])     return "Format d'email invalide";
+    if (ctrl.errors['minlength']) return `Minimum ${ctrl.errors['minlength'].requiredLength} caractères`;
+    if (ctrl.errors['maxlength']) return `Maximum ${ctrl.errors['maxlength'].requiredLength} caractères`;
+    return 'Valeur invalide';
+  }
+
+  selectRole(role: Role): void {
+    this.form.patchValue({ role });
+  }
+
+  get passwordStrength(): number {
+    const pw = this.form.get('password')?.value ?? '';
+    let score = 0;
+    if (pw.length >= 6)           score++;
+    if (pw.length >= 10)          score++;
+    if (/[A-Z]/.test(pw))         score++;
+    if (/[0-9]/.test(pw))         score++;
+    if (/[^A-Za-z0-9]/.test(pw))  score++;
+    return score;
+  }
+
+  get passwordStrengthLabel(): string {
+    const s = this.passwordStrength;
+    if (s <= 1) return 'Faible';
+    if (s <= 3) return 'Moyen';
+    return 'Fort';
+  }
+
+  get passwordStrengthClass(): string {
+    const s = this.passwordStrength;
+    if (s <= 1) return 'strength--weak';
+    if (s <= 3) return 'strength--medium';
+    return 'strength--strong';
   }
 }

@@ -1,38 +1,90 @@
-<mat-nav-list class="sidebar-nav">
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed">
 
-      <div class="sidebar-header">
-        <mat-icon>school</mat-icon>
-        <span>Université</span>
-      </div>
+  <!-- Logo & Brand -->
+  <div class="sidebar__brand">
+    <div class="sidebar__logo">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,4 36,14 36,26 20,36 4,26 4,14" fill="#6C63FF" opacity="0.15" stroke="#6C63FF" stroke-width="1.5"/>
+        <polygon points="20,9 31,16 31,24 20,31 9,24 9,16" fill="#6C63FF" opacity="0.3" stroke="#6C63FF" stroke-width="1"/>
+        <circle cx="20" cy="20" r="5" fill="#6C63FF"/>
+      </svg>
+    </div>
+    <div class="sidebar__brand-text" *ngIf="!collapsed">
+      <span class="sidebar__brand-name">UniPFE</span>
+      <span class="sidebar__brand-sub">Plateforme académique</span>
+    </div>
+    <button class="sidebar__collapse-btn" (click)="collapseToggle.emit()" matRipple>
+      <mat-icon>{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    </button>
+  </div>
 
-      <mat-divider></mat-divider>
+  <!-- User profile pill -->
+  <div class="sidebar__user" *ngIf="!collapsed">
+    <div class="sidebar__avatar">
+      <span>{{ auth.userName().charAt(0).toUpperCase() }}</span>
+    </div>
+    <div class="sidebar__user-info">
+      <span class="sidebar__user-name">{{ auth.userName() }}</span>
+      <span class="sidebar__role-badge" [class]="getRoleBadgeClass()">
+        {{ getRoleLabel() }}
+      </span>
+    </div>
+  </div>
 
-      <!-- Dashboard — tous les rôles -->
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle>Tableau de bord</span>
-      </a>
+  <!-- Navigation -->
+  <nav class="sidebar__nav">
+    <div class="sidebar__nav-label" *ngIf="!collapsed">Navigation</div>
 
-      <!-- Gestion utilisateurs — ADMIN uniquement -->
-      @if (auth.isAdmin()) {
-        <mat-divider></mat-divider>
+    <ng-container *ngFor="let item of visibleItems()">
 
-        <a mat-list-item routerLink="/users" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>group</mat-icon>
-          <span matListItemTitle>Utilisateurs</span>
+      <!-- Item sans enfants -->
+      <ng-container *ngIf="!item.children || item.children.length === 0">
+        <a class="sidebar__nav-item"
+           [routerLink]="item.route"
+           routerLinkActive="sidebar__nav-item--active"
+           matRipple
+           [matTooltip]="collapsed ? item.label : ''"
+           matTooltipPosition="right">
+          <mat-icon class="sidebar__nav-icon">{{ item.icon }}</mat-icon>
+          <span class="sidebar__nav-label-text" *ngIf="!collapsed">{{ item.label }}</span>
         </a>
+      </ng-container>
 
-        <a mat-list-item routerLink="/users/create" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>person_add</mat-icon>
-          <span matListItemTitle>Ajouter un utilisateur</span>
-        </a>
-      }
+      <!-- Item avec sous-menu (accordion) -->
+      <ng-container *ngIf="item.children && item.children.length > 0">
+        <div class="sidebar__nav-item sidebar__nav-item--parent"
+             (click)="toggleExpand(item.route)"
+             matRipple
+             [matTooltip]="collapsed ? item.label : ''"
+             matTooltipPosition="right">
+          <mat-icon class="sidebar__nav-icon">{{ item.icon }}</mat-icon>
+          <span class="sidebar__nav-label-text" *ngIf="!collapsed">{{ item.label }}</span>
+          <mat-icon class="sidebar__chevron" *ngIf="!collapsed">
+            {{ isExpanded(item.route) ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </div>
 
-      <mat-divider></mat-divider>
+        <div class="sidebar__submenu" [class.sidebar__submenu--open]="isExpanded(item.route)">
+          <a *ngFor="let child of item.children"
+             class="sidebar__nav-item sidebar__nav-item--child"
+             [routerLink]="child.route"
+             routerLinkActive="sidebar__nav-item--active"
+             matRipple>
+            <mat-icon class="sidebar__nav-icon sidebar__nav-icon--sm">{{ child.icon }}</mat-icon>
+            <span class="sidebar__nav-label-text" *ngIf="!collapsed">{{ child.label }}</span>
+          </a>
+        </div>
+      </ng-container>
 
-      <a mat-list-item class="logout-item" (click)="auth.logout()">
-        <mat-icon matListItemIcon>logout</mat-icon>
-        <span matListItemTitle>Déconnexion</span>
-      </a>
+    </ng-container>
+  </nav>
 
-    </mat-nav-list>
+  <!-- Bottom: logout -->
+  <div class="sidebar__footer">
+    <button class="sidebar__logout" (click)="auth.logout()" matRipple>
+      <mat-icon>logout</mat-icon>
+      <span *ngIf="!collapsed">Déconnexion</span>
+    </button>
+  </div>
+
+</aside>

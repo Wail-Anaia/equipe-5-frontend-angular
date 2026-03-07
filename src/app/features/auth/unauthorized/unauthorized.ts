@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
   templateUrl: './unauthorized.html',
   styleUrl: './unauthorized.scss',
 })
-export class UnauthorizedComponent {
+export class Unauthorized {
   constructor(private router: Router) {}
 
   goHome() {

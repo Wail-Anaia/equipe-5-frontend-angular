@@ -9,14 +9,17 @@ export class AuthService {
 
   private readonly API = 'http://localhost:8080/api/auth';
 
-  // Token en mémoire uniquement (jamais localStorage)
+  // ✅ Token en mémoire uniquement — jamais localStorage
   private readonly _state = signal<AuthState>({ token: null, user: null });
 
-  readonly user    = computed(() => this._state().user);
-  readonly token   = computed(() => this._state().token);
-  readonly isLoggedIn = computed(() => this._state().token !== null);
-  readonly role    = computed(() => this._state().user?.role ?? null);
-  readonly isAdmin = computed(() => this._state().user?.role === 'ADMIN');
+  readonly user        = computed(() => this._state().user);
+  readonly token       = computed(() => this._state().token);
+  readonly isLoggedIn  = computed(() => this._state().token !== null);
+  readonly role        = computed(() => this._state().user?.role ?? null);
+  readonly isAdmin     = computed(() => this._state().user?.role === 'ADMIN');
+  readonly isEncadrant = computed(() => this._state().user?.role === 'ENCADRANT');
+  readonly isEtudiant  = computed(() => this._state().user?.role === 'ETUDIANT');
+  readonly userName    = computed(() => this._state().user?.nom ?? '');
 
   constructor(private http: HttpClient, private router: Router) {}
 

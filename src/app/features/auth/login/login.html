@@ -1,52 +1,132 @@
-<div class="login-wrapper">
-  <mat-card class="login-card mat-elevation-z8">
+<div class="login-page">
 
-    <mat-card-header>
-      <mat-card-title>
-        <span class="university-logo">🎓</span>
-        <span>Université Internationale</span>
-      </mat-card-title>
-      <mat-card-subtitle>Plateforme de gestion des projets étudiants</mat-card-subtitle>
-    </mat-card-header>
+  <!-- Left panel — branding -->
+  <div class="login-brand">
+    <div class="brand-inner">
+      <div class="brand-logo">
+        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,5 55,20 55,40 30,55 5,40 5,20"
+                   fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <polygon points="30,12 48,23 48,37 30,48 12,37 12,23"
+                   fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <circle cx="30" cy="30" r="8" fill="rgba(255,255,255,0.9)"/>
+          <circle cx="30" cy="30" r="4" fill="#6C63FF"/>
+        </svg>
+      </div>
+      <h1 class="brand-name">UniPFE</h1>
+      <p class="brand-tagline">Plateforme académique de gestion<br>des projets de fin d'études</p>
 
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off">
+      <div class="brand-features">
+        <div class="brand-feature">
+          <span class="brand-feature__icon">🔐</span>
+          <span>Accès sécurisé par JWT</span>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature__icon">👥</span>
+          <span>Gestion multi-rôles</span>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature__icon">📊</span>
+          <span>Suivi en temps réel</span>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature__icon">📋</span>
+          <span>Audit & traçabilité</span>
+        </div>
+      </div>
+    </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Adresse email</mat-label>
-          <input matInput type="email" formControlName="email"
-                 placeholder="vous@université.ma" autocomplete="email">
-          <mat-icon matSuffix>email</mat-icon>
-          <mat-error *ngIf="form.get('email')?.hasError('required')">
-            L'email est obligatoire
-          </mat-error>
-          <mat-error *ngIf="form.get('email')?.hasError('email')">
-            Format d'email invalide
-          </mat-error>
-        </mat-form-field>
+    <!-- Decorative circles -->
+    <div class="brand-deco brand-deco--1"></div>
+    <div class="brand-deco brand-deco--2"></div>
+    <div class="brand-deco brand-deco--3"></div>
+  </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Mot de passe</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'"
-                 formControlName="password" autocomplete="current-password">
-          <button mat-icon-button matSuffix type="button"
-                  (click)="hidePassword = !hidePassword">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          <mat-error *ngIf="form.get('password')?.hasError('required')">
-            Le mot de passe est obligatoire
-          </mat-error>
-        </mat-form-field>
+  <!-- Right panel — form -->
+  <div class="login-form-panel">
+    <div class="login-form-inner">
 
-        <button mat-raised-button color="primary" type="submit"
-                class="full-width submit-btn"
-                [disabled]="loading || form.invalid">
-          <mat-spinner *ngIf="loading" diameter="20" class="spinner-inline"></mat-spinner>
+      <div class="form-header">
+        <h2 class="form-title">Connexion</h2>
+        <p class="form-subtitle">Accédez à votre espace académique</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off" novalidate>
+
+        <!-- Email -->
+        <div class="field-group">
+          <label class="field-label" for="email">Adresse email</label>
+          <div class="field-input-wrap" [class.field-input-wrap--error]="hasError('email', 'email') || hasError('email', 'required')">
+            <mat-icon class="field-icon">alternate_email</mat-icon>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="vous@université.ma"
+              autocomplete="email"
+              class="field-input"
+            >
+          </div>
+          <span class="field-error" *ngIf="hasError('email', 'required')">L'email est obligatoire</span>
+          <span class="field-error" *ngIf="hasError('email', 'email')">Format d'email invalide</span>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label class="field-label" for="password">Mot de passe</label>
+          <div class="field-input-wrap" [class.field-input-wrap--error]="hasError('password', 'required')">
+            <mat-icon class="field-icon">lock_outline</mat-icon>
+            <input
+              id="password"
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              class="field-input"
+            >
+            <button type="button" class="field-toggle" (click)="hidePassword = !hidePassword"
+                    [attr.aria-label]="hidePassword ? 'Afficher' : 'Masquer'">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+          <span class="field-error" *ngIf="hasError('password', 'required')">Le mot de passe est obligatoire</span>
+          <span class="field-error" *ngIf="hasError('password', 'minlength')">Minimum 6 caractères</span>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="submit-btn"
+          [class.submit-btn--loading]="loading"
+          [disabled]="loading || form.invalid"
+        >
+          <span class="submit-btn__spinner" *ngIf="loading">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </span>
           <span>{{ loading ? 'Connexion...' : 'Se connecter' }}</span>
         </button>
 
       </form>
-    </mat-card-content>
 
-  </mat-card>
+      <!-- Demo credentials hint -->
+      <div class="demo-hint">
+        <span class="demo-hint__label">Compte démo</span>
+        <div class="demo-creds">
+          <code>admin&#64;university.ma</code>
+          <span class="demo-sep">/</span>
+          <code>Admin&#64;1234</code>
+        </div>
+      </div>
+
+      <p class="form-footer">
+        Problème de connexion ? Contactez votre
+        <a href="mailto:support@university.ma">administrateur système</a>
+      </p>
+
+    </div>
+  </div>
+
 </div>

@@ -1,1 +1,8 @@
-<p>dashboard works!</p>
+<ng-container [ngSwitch]="auth.role()">
+      <app-admin-dashboard     *ngSwitchCase="'ADMIN'"    ></app-admin-dashboard>
+      <app-encadrant-dashboard *ngSwitchCase="'ENCADRANT'"></app-encadrant-dashboard>
+      <app-student-dashboard   *ngSwitchCase="'ETUDIANT'" ></app-student-dashboard>
+      <div *ngSwitchDefault class="role-unknown">
+        Rôle inconnu. Veuillez contacter l'administrateur.
+      </div>
+</ng-container>

@@ -1,0 +1,126 @@
+<!-- ════════════════════════════════════════════════════
+     ADMIN DASHBOARD
+     ════════════════════════════════════════════════════ -->
+
+<div class="admin-dash">
+
+  <!-- ── Page header ──────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__left">
+      <h1 class="page-header__title">Tableau de bord</h1>
+      <p class="page-header__sub">Vue d'ensemble de la plateforme académique</p>
+    </div>
+    <div class="page-header__actions">
+      <button class="btn-refresh" (click)="loadStats()" title="Actualiser">
+        <mat-icon>refresh</mat-icon>
+        Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading skeleton ─────────────────────────────── -->
+  <div class="skeleton-grid" *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- ── Stat cards ───────────────────────────────────── -->
+  <div class="stats-grid" *ngIf="!loading">
+    <div class="stat-card" [class]="card.colorClass"
+         *ngFor="let card of statCards; let i = index"
+         [routerLink]="card.route"
+         [class.stat-card--clickable]="card.route"
+         [style.animation-delay]="i * 80 + 'ms'">
+
+      <div class="stat-card__top">
+        <div class="stat-card__icon-wrap">
+          <mat-icon>{{ card.icon }}</mat-icon>
+        </div>
+        <div class="stat-card__trend" *ngIf="card.trend !== undefined"
+             [class.trend-up]="card.trendUp" [class.trend-down]="!card.trendUp">
+          <mat-icon>{{ card.trendUp ? 'trending_up' : 'trending_down' }}</mat-icon>
+          <span>+{{ card.trend }}%</span>
+        </div>
+      </div>
+
+      <div class="stat-card__body">
+        <span class="stat-card__value">{{ card.value }}</span>
+        <span class="stat-card__title">{{ card.title }}</span>
+        <span class="stat-card__sub">{{ card.subtitle }}</span>
+      </div>
+
+      <div class="stat-card__bar"></div>
+    </div>
+  </div>
+
+  <!-- ── Main content grid ───────────────────────────── -->
+  <div class="main-grid" *ngIf="!loading">
+
+    <!-- Recent Activity -->
+    <section class="card activity-card">
+      <div class="card__header">
+        <div class="card__header-left">
+          <mat-icon class="card__header-icon">receipt_long</mat-icon>
+          <h2 class="card__title">Journal d'activité récent</h2>
+        </div>
+        <a routerLink="/audit" class="card__link">Voir tout →</a>
+      </div>
+
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let act of recentActivities">
+          <div class="activity-icon" [style.background]="act.color + '18'"
+               [style.border-color]="act.color + '30'">
+            <mat-icon [style.color]="act.color">{{ act.icon }}</mat-icon>
+          </div>
+          <div class="activity-body">
+            <span class="activity-action">{{ act.action }}</span>
+            <span class="activity-detail">{{ act.detail }}</span>
+          </div>
+          <div class="activity-meta">
+            <span class="activity-user">{{ act.user }}</span>
+            <span class="activity-time">{{ act.time }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="card quick-card">
+      <div class="card__header">
+        <div class="card__header-left">
+          <mat-icon class="card__header-icon">bolt</mat-icon>
+          <h2 class="card__title">Actions rapides</h2>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <a class="quick-action"
+           *ngFor="let action of quickActions"
+           [routerLink]="action.route">
+          <div class="quick-action__icon" [style.background]="action.color + '18'"
+               [style.border-color]="action.color + '30'">
+            <mat-icon [style.color]="action.color">{{ action.icon }}</mat-icon>
+          </div>
+          <span class="quick-action__label">{{ action.label }}</span>
+        </a>
+      </div>
+
+      <!-- Mini stats panel -->
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <span class="mini-stat__label">Projets en attente</span>
+          <span class="mini-stat__value mini-stat__value--warn">7</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat__label">Comptes inactifs</span>
+          <span class="mini-stat__value mini-stat__value--danger">3</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat__label">Projets terminés</span>
+          <span class="mini-stat__value mini-stat__value--success">14</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</div>

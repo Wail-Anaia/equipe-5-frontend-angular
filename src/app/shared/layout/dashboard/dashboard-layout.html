@@ -1,0 +1,18 @@
+<div class="layout" [class.layout--collapsed]="collapsed()">
+      <app-sidebar
+        [collapsed]="collapsed()"
+        (collapseToggle)="collapsed.set(!collapsed())"
+      ></app-sidebar>
+
+      <div class="layout__main">
+        <app-navbar
+          [pageTitle]="pageTitle()"
+          [sidebarCollapsed]="collapsed()"
+          (menuToggle)="collapsed.set(!collapsed())"
+        ></app-navbar>
+
+        <main class="layout__content">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+    </div>

@@ -1,0 +1,82 @@
+<div class="user-detail">
+
+  <!-- Back -->
+  <a class="back-link" routerLink="/users">
+    <mat-icon>arrow_back</mat-icon>
+    Retour à la liste
+  </a>
+
+  <!-- Skeleton -->
+  <div class="skeleton-wrap" *ngIf="loading">
+    <div class="skeleton skeleton--avatar"></div>
+    <div class="skeleton-info">
+      <div class="skeleton skeleton--title"></div>
+      <div class="skeleton skeleton--sub"></div>
+      <div class="skeleton skeleton--sub" style="width:40%"></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!loading && user">
+
+    <!-- Header card -->
+    <div class="profile-card">
+      <div class="profile-card__left">
+        <div class="profile-avatar" [class.profile-avatar--inactive]="!user.actif">
+          {{ getInitials() }}
+        </div>
+        <div class="profile-info">
+          <h1 class="profile-name">{{ user.nom }}</h1>
+          <a class="profile-email" [href]="'mailto:' + user.email">
+            <mat-icon>alternate_email</mat-icon>{{ user.email }}
+          </a>
+          <div class="profile-meta">
+            <span class="role-badge" [class]="getRoleClass()">{{ user.role }}</span>
+            <span class="status-pill" [class.status-pill--active]="user.actif"
+                                      [class.status-pill--inactive]="!user.actif">
+              <span class="status-dot"></span>
+              {{ user.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card__actions">
+        <button class="btn-toggle"
+                [class.btn-toggle--disable]="user.actif"
+                [class.btn-toggle--enable]="!user.actif"
+                [disabled]="toggling"
+                (click)="toggleStatus()">
+          <mat-icon>{{ user.actif ? 'block' : 'check_circle' }}</mat-icon>
+          {{ user.actif ? 'Désactiver' : 'Activer' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Details grid -->
+    <div class="details-grid">
+      <div class="detail-card">
+        <div class="detail-card__icon"><mat-icon>badge</mat-icon></div>
+        <div class="detail-card__body">
+          <span class="detail-card__label">Identifiant</span>
+          <span class="detail-card__value">#{{ user.id }}</span>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card__icon detail-card__icon--green"><mat-icon>event</mat-icon></div>
+        <div class="detail-card__body">
+          <span class="detail-card__label">Créé le</span>
+          <span class="detail-card__value">{{ user.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="detail-card__icon detail-card__icon--amber"><mat-icon>update</mat-icon></div>
+        <div class="detail-card__body">
+          <span class="detail-card__label">Dernière mise à jour</span>
+          <span class="detail-card__value">{{ user.updatedAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

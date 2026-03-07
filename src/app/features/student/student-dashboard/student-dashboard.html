@@ -1,0 +1,130 @@
+<div class="student-dash">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-header__title">Bonjour, {{ auth.user() }} 👋</h1>
+      <p class="page-header__sub">Voici l'état de vos projets et activités académiques</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="skeleton-grid" *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <ng-container *ngIf="!loading && stats">
+
+    <!-- Top row : 3 cards -->
+    <div class="top-row">
+
+      <!-- Mes projets -->
+      <section class="card projects-card">
+        <div class="card__header">
+          <div class="card__header-left">
+            <div class="card__icon card__icon--blue">
+              <mat-icon>book</mat-icon>
+            </div>
+            <h2 class="card__title">Mes projets</h2>
+          </div>
+          <span class="card__count">{{ stats.myProjects.length }}</span>
+        </div>
+
+        <div class="project-list">
+          <a class="project-item" *ngFor="let p of stats.myProjects"
+             [routerLink]="['/my-projects', p.id]">
+            <div class="project-item__icon">
+              <mat-icon>folder_special</mat-icon>
+            </div>
+            <div class="project-item__body">
+              <span class="project-item__title">{{ p.titre }}</span>
+              <span class="project-item__date">Mis à jour : {{ p.updatedAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <span class="status-badge" [class]="getStatutClass(p.statut)">
+              {{ getStatutLabel(p.statut) }}
+            </span>
+          </a>
+
+          <div class="empty-state" *ngIf="stats.myProjects.length === 0">
+            <mat-icon>inbox</mat-icon>
+            <span>Aucun projet assigné pour le moment</span>
+          </div>
+        </div>
+
+        <a routerLink="/my-projects" class="card__footer-link">
+          <mat-icon>add</mat-icon>
+          Voir tous mes projets
+        </a>
+      </section>
+
+      <!-- Mon encadrant -->
+      <section class="card encadrant-card">
+        <div class="card__header">
+          <div class="card__header-left">
+            <div class="card__icon card__icon--emerald">
+              <mat-icon>person_pin</mat-icon>
+            </div>
+            <h2 class="card__title">Mon encadrant</h2>
+          </div>
+        </div>
+
+        <div class="encadrant-profile" *ngIf="stats.encadrant; else noEncadrant">
+          <div class="encadrant-avatar">
+            {{ stats.encadrant.nom.charAt(0) }}
+          </div>
+          <div class="encadrant-info">
+            <span class="encadrant-name">{{ stats.encadrant.nom }}</span>
+            <span class="encadrant-spec">{{ stats.encadrant.specialite }}</span>
+            <a class="encadrant-email" [href]="'mailto:' + stats.encadrant.email">
+              <mat-icon>email</mat-icon>
+              {{ stats.encadrant.email }}
+            </a>
+          </div>
+        </div>
+
+        <ng-template #noEncadrant>
+          <div class="empty-state">
+            <mat-icon>person_off</mat-icon>
+            <span>Encadrant non encore assigné</span>
+          </div>
+        </ng-template>
+      </section>
+
+    </div>
+
+    <!-- Documents -->
+    <section class="card documents-card">
+      <div class="card__header">
+        <div class="card__header-left">
+          <div class="card__icon card__icon--violet">
+            <mat-icon>folder_open</mat-icon>
+          </div>
+          <h2 class="card__title">Mes documents</h2>
+        </div>
+        <span class="card__count">{{ stats.documents.length }}</span>
+      </div>
+
+      <div class="doc-grid">
+        <div class="doc-item" *ngFor="let doc of stats.documents">
+          <div class="doc-icon" [style.background]="getDocColor(doc.type) + '18'"
+               [style.border-color]="getDocColor(doc.type) + '30'">
+            <mat-icon [style.color]="getDocColor(doc.type)">{{ getDocIcon(doc.type) }}</mat-icon>
+          </div>
+          <div class="doc-body">
+            <span class="doc-name">{{ doc.nom }}</span>
+            <span class="doc-date">{{ doc.uploadedAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <span class="doc-type-badge" [style.background]="getDocColor(doc.type) + '15'"
+                [style.color]="getDocColor(doc.type)">{{ doc.type }}</span>
+        </div>
+      </div>
+
+      <a routerLink="/documents" class="card__footer-link">
+        <mat-icon>upload_file</mat-icon>
+        Gérer mes documents
+      </a>
+    </section>
+
+  </ng-container>
+
+</div>

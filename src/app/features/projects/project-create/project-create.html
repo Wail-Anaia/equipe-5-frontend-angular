@@ -1,0 +1,55 @@
+<div class="project-create">
+
+  <a class="back-link" routerLink="/projects">
+    <mat-icon>arrow_back</mat-icon> Retour aux projets
+  </a>
+
+  <div class="page-header">
+    <h1 class="page-title">Créer un nouveau projet</h1>
+    <p class="page-sub">Définissez le titre et la description du projet académique</p>
+  </div>
+
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Titre -->
+      <div class="field-group" [class.field-group--error]="isInvalid('titre')">
+        <label class="field-label" for="titre">
+          <mat-icon>title</mat-icon> Titre du projet
+        </label>
+        <div class="field-wrap">
+          <input id="titre" type="text" formControlName="titre"
+                 class="field-input" placeholder="Ex : Plateforme e-learning IA">
+        </div>
+        <span class="field-error" *ngIf="isInvalid('titre')">{{ getError('titre') }}</span>
+      </div>
+
+      <!-- Description -->
+      <div class="field-group" [class.field-group--error]="isInvalid('description')">
+        <label class="field-label" for="description">
+          <mat-icon>notes</mat-icon> Description
+        </label>
+        <div class="field-wrap">
+          <textarea id="description" formControlName="description"
+                    class="field-input field-textarea" rows="5"
+                    placeholder="Décrivez les objectifs et le périmètre du projet..."></textarea>
+        </div>
+        <span class="field-error" *ngIf="isInvalid('description')">{{ getError('description') }}</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a class="btn-cancel" routerLink="/projects">Annuler</a>
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          <span class="btn-spinner" *ngIf="loading">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/>
+            <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+          </span>
+          <mat-icon *ngIf="!loading">add_circle</mat-icon>
+          {{ loading ? 'Création...' : 'Créer le projet' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
