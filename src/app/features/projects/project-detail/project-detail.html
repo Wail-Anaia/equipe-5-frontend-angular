@@ -1,11 +1,11 @@
 <div class="project-detail">
 
-  <a class="back-link" routerLink="..">
+  <a class="back-link" [routerLink]="auth.role() === 'ETUDIANT' ? '/my-projects' : (auth.role() === 'ENCADRANT' ? '/supervised' : '/projects')">
     <mat-icon>arrow_back</mat-icon> Retour
   </a>
 
   <!-- Skeleton -->
-  <div class="skeleton-card" *ngIf="loading">
+  <div class="skeleton-wrap" *ngIf="loading">
     <div class="skeleton sk--title"></div>
     <div class="skeleton sk--line"></div>
     <div class="skeleton sk--line" style="width:60%"></div>
@@ -13,81 +13,67 @@
 
   <ng-container *ngIf="!loading && project">
 
-    <!-- Header -->
-    <div class="project-header">
-      <div class="project-header__left">
+    <!-- Header card -->
+    <div class="header-card">
+      <div class="header-card__left">
         <div class="project-icon"><mat-icon>folder_special</mat-icon></div>
         <div>
           <h1 class="project-title">{{ project.titre }}</h1>
-          <div class="project-meta">
-            <span class="status-badge" [class]="getStatutClass()">{{ getStatutLabel() }}</span>
+          <div class="meta-row">
+            <div class="dot" [style.background]="dot(project.statut)"></div>
+            <span class="status-badge" [class]="css(project.statut)">{{ label(project.statut) }}</span>
             <span class="meta-sep">·</span>
-            <span class="meta-date">Créé le {{ project.createdAt | date:'dd/MM/yyyy' }}</span>
+            <span class="meta-date">Créé {{ project.createdAt | date:'dd/MM/yyyy' }}</span>
+            <span *ngIf="project.team" class="team-chip">
+              <mat-icon>group</mat-icon> {{ project.team.nom }}
+            </span>
           </div>
         </div>
+      </div>
+
+      <!-- Changer statut (ADMIN / ENCADRANT) -->
+      <div class="statut-actions" *ngIf="auth.role() !== 'ETUDIANT'">
+        <span class="statut-actions__label">Changer statut :</span>
+        <button *ngFor="let s of allStatuts"
+                class="statut-btn"
+                [class.statut-btn--active]="project.statut === s"
+                (click)="changeStatut(s)">
+          {{ label(s) }}
+        </button>
       </div>
     </div>
 
     <!-- Description -->
     <div class="section-card">
       <h2 class="section-title"><mat-icon>description</mat-icon> Description</h2>
-      <p class="project-desc">{{ project.description }}</p>
+      <p class="desc-text">{{ project.description }}</p>
     </div>
 
-    <!-- Personnes -->
-    <div class="persons-grid">
+    <!-- Technologies -->
+    <div class="section-card" *ngIf="project.technologies">
+      <h2 class="section-title"><mat-icon>code</mat-icon> Technologies</h2>
+      <div class="tech-tags">
+        <span class="tech-tag" *ngFor="let t of techs()">{{ t }}</span>
+      </div>
+    </div>
 
-      <!-- Étudiant -->
-      <div class="person-card">
-        <div class="person-card__header">
-          <mat-icon>school</mat-icon>
-          <span>Étudiant</span>
-        </div>
-        <div class="person-card__body">
-          <div class="person-avatar person-avatar--blue">
-            {{ project.etudiant.nom.charAt(0) }}
-          </div>
-          <div>
-            <div class="person-name">{{ project.etudiant.nom }}</div>
-            <a class="person-email" [href]="'mailto:' + project.etudiant.email">
-              {{ project.etudiant.email }}
-            </a>
-          </div>
+    <!-- Encadrant -->
+    <div class="section-card" *ngIf="project.encadrant">
+      <h2 class="section-title"><mat-icon>supervisor_account</mat-icon> Encadrant</h2>
+      <div class="person-cell">
+        <div class="avatar avatar--green">{{ project.encadrant.nom.charAt(0) }}</div>
+        <div>
+          <div class="person-name">{{ project.encadrant.nom }}</div>
+          <a class="person-email" [href]="'mailto:' + project.encadrant.email">{{ project.encadrant.email }}</a>
         </div>
       </div>
-
-      <!-- Encadrant -->
-      <div class="person-card">
-        <div class="person-card__header">
-          <mat-icon>supervisor_account</mat-icon>
-          <span>Encadrant</span>
-        </div>
-        <div class="person-card__body" *ngIf="project.encadrant; else noEncadrant">
-          <div class="person-avatar person-avatar--green">
-            {{ project.encadrant.nom.charAt(0) }}
-          </div>
-          <div>
-            <div class="person-name">{{ project.encadrant.nom }}</div>
-            <a class="person-email" [href]="'mailto:' + project.encadrant.email">
-              {{ project.encadrant.email }}
-            </a>
-          </div>
-        </div>
-        <ng-template #noEncadrant>
-          <div class="no-encadrant">
-            <mat-icon>person_off</mat-icon>
-            <span>Non assigné</span>
-          </div>
-        </ng-template>
-      </div>
-
     </div>
 
     <!-- Dates -->
     <div class="dates-row">
       <div class="date-item">
-        <span class="date-label">Dernière mise à jour</span>
-        <span class="date-value">{{ project.updatedAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+        <span class="date-label">Dernière MÀJ</span>
+        <span class="date-value">{{ project.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
       </div>
       <div class="date-item">
         <span class="date-label">Référence</span>

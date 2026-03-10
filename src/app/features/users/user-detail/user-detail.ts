@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatIconModule }   from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { environment } from '../../../../environments/environment';
 
 interface UserDetail {
   id: number;
@@ -41,7 +42,7 @@ export class UserDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    this.http.get<UserDetail>(`/api/users/${id}`).subscribe({
+    this.http.get<UserDetail>(`${environment.apiUrl}/users/${id}`).subscribe({
       next:  u  => { this.user = u; this.loading = false; },
       error: () => { this.user = this.demoUser; this.loading = false; }
     });
@@ -52,7 +53,7 @@ export class UserDetailComponent implements OnInit {
     this.toggling = true;
     const newStatus = !this.user.actif;
 
-    this.http.patch(`/api/users/${this.user.id}/status`, { actif: newStatus }).subscribe({
+    this.http.patch(`${environment.apiUrl}/users/${this.user.id}/status`, { actif: newStatus }).subscribe({
       next: () => {
         this.user!.actif = newStatus;
         this.toggling = false;

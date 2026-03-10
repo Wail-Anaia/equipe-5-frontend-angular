@@ -1,24 +1,55 @@
-<div class="student-dash">
+<div class="student-dash" style="position:relative">
+
+  <!-- Loading Spinner global -->
+  <app-loading-spinner
+    [loading]="loading"
+    label="Chargement de votre espace..."
+    [diameter]="44">
+  </app-loading-spinner>
+
+  <!-- Demo mode banner -->
+  <div class="demo-banner" *ngIf="demoMode() && !loading">
+    <mat-icon>info</mat-icon>
+    Mode démo — les données affichées sont des exemples.
+    <span>Le backend n'est pas disponible pour le moment.</span>
+  </div>
 
   <!-- Page header -->
   <div class="page-header">
     <div>
-      <h1 class="page-header__title">Bonjour, {{ auth.user() }} 👋</h1>
-      <p class="page-header__sub">Voici l'état de vos projets et activités académiques</p>
+      <h1 class="page-header__title">
+        Bonjour, {{ auth.userName() }}
+      </h1>
+      <p class="page-header__sub">
+        Voici l'état de vos projets et activités académiques
+      </p>
+    </div>
+
+    <!-- Mini stats header -->
+    <div class="header-badges" *ngIf="!loading && stats">
+      <div class="header-badge header-badge--blue">
+        <mat-icon>book</mat-icon>
+        <span>{{ stats.myProjects.length }} projet{{ stats.myProjects.length > 1 ? 's' : '' }}</span>
+      </div>
+      <div class="header-badge header-badge--violet">
+        <mat-icon>folder_open</mat-icon>
+        <span>{{ stats.documents.length }} document{{ stats.documents.length > 1 ? 's' : '' }}</span>
+      </div>
     </div>
   </div>
 
-  <!-- Loading -->
+  <!-- Skeleton loading -->
   <div class="skeleton-grid" *ngIf="loading">
     <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
   </div>
 
+  <!-- Content -->
   <ng-container *ngIf="!loading && stats">
 
-    <!-- Top row : 3 cards -->
+    <!-- Top row : Projets + Encadrant -->
     <div class="top-row">
 
-      <!-- Mes projets -->
+      <!-- ── Mes projets ─────────────────────────── -->
       <section class="card projects-card">
         <div class="card__header">
           <div class="card__header-left">
@@ -31,15 +62,30 @@
         </div>
 
         <div class="project-list">
-          <a class="project-item" *ngFor="let p of stats.myProjects"
+          <a class="project-item"
+             *ngFor="let p of stats.myProjects"
              [routerLink]="['/my-projects', p.id]">
+
             <div class="project-item__icon">
               <mat-icon>folder_special</mat-icon>
             </div>
+
             <div class="project-item__body">
               <span class="project-item__title">{{ p.titre }}</span>
-              <span class="project-item__date">Mis à jour : {{ p.updatedAt | date:'dd/MM/yyyy' }}</span>
+              <div class="project-item__progress">
+                <div class="progress-bar">
+                  <div class="progress-bar__fill"
+                       [style.width.%]="getProgressValue(p.statut)"
+                       [class]="'progress-bar__fill--' + p.statut">
+                  </div>
+                </div>
+                <span class="progress-percent">{{ getProgressValue(p.statut) }}%</span>
+              </div>
+              <span class="project-item__date">
+                Mis à jour : {{ p.updatedAt | date:'dd/MM/yyyy' }}
+              </span>
             </div>
+
             <span class="status-badge" [class]="getStatutClass(p.statut)">
               {{ getStatutLabel(p.statut) }}
             </span>
@@ -52,12 +98,12 @@
         </div>
 
         <a routerLink="/my-projects" class="card__footer-link">
-          <mat-icon>add</mat-icon>
+          <mat-icon>arrow_forward</mat-icon>
           Voir tous mes projets
         </a>
       </section>
 
-      <!-- Mon encadrant -->
+      <!-- ── Mon encadrant ──────────────────────── -->
       <section class="card encadrant-card">
         <div class="card__header">
           <div class="card__header-left">
@@ -69,17 +115,32 @@
         </div>
 
         <div class="encadrant-profile" *ngIf="stats.encadrant; else noEncadrant">
+
           <div class="encadrant-avatar">
             {{ stats.encadrant.nom.charAt(0) }}
           </div>
+
           <div class="encadrant-info">
             <span class="encadrant-name">{{ stats.encadrant.nom }}</span>
-            <span class="encadrant-spec">{{ stats.encadrant.specialite }}</span>
-            <a class="encadrant-email" [href]="'mailto:' + stats.encadrant.email">
+
+            <span class="encadrant-spec" *ngIf="stats.encadrant.specialite">
+              {{ stats.encadrant.specialite }}
+            </span>
+
+            <a class="encadrant-email"
+               [href]="'mailto:' + stats.encadrant.email">
               <mat-icon>email</mat-icon>
               {{ stats.encadrant.email }}
             </a>
           </div>
+        </div>
+
+        <!-- Actions rapides encadrant -->
+        <div class="encadrant-actions" *ngIf="stats.encadrant">
+          <a [href]="'mailto:' + stats.encadrant.email" class="action-btn action-btn--primary">
+            <mat-icon>mail</mat-icon>
+            Envoyer un message
+          </a>
         </div>
 
         <ng-template #noEncadrant>
@@ -92,7 +153,7 @@
 
     </div>
 
-    <!-- Documents -->
+    <!-- ── Mes documents ───────────────────────────── -->
     <section class="card documents-card">
       <div class="card__header">
         <div class="card__header-left">
@@ -105,17 +166,34 @@
       </div>
 
       <div class="doc-grid">
-        <div class="doc-item" *ngFor="let doc of stats.documents">
-          <div class="doc-icon" [style.background]="getDocColor(doc.type) + '18'"
+        <div class="doc-item"
+             *ngFor="let doc of stats.documents">
+
+          <div class="doc-icon"
+               [style.background]="getDocColor(doc.type) + '18'"
                [style.border-color]="getDocColor(doc.type) + '30'">
-            <mat-icon [style.color]="getDocColor(doc.type)">{{ getDocIcon(doc.type) }}</mat-icon>
+            <mat-icon [style.color]="getDocColor(doc.type)">
+              {{ getDocIcon(doc.type) }}
+            </mat-icon>
           </div>
+
           <div class="doc-body">
-            <span class="doc-name">{{ doc.nom }}</span>
-            <span class="doc-date">{{ doc.uploadedAt | date:'dd/MM/yyyy' }}</span>
+            <span class="doc-name" [title]="doc.nom">{{ doc.nom }}</span>
+            <span class="doc-date">
+              {{ doc.uploadedAt | date:'dd/MM/yyyy' }}
+            </span>
           </div>
-          <span class="doc-type-badge" [style.background]="getDocColor(doc.type) + '15'"
-                [style.color]="getDocColor(doc.type)">{{ doc.type }}</span>
+
+          <span class="doc-type-badge"
+                [style.background]="getDocColor(doc.type) + '15'"
+                [style.color]="getDocColor(doc.type)">
+            {{ doc.type }}
+          </span>
+        </div>
+
+        <div class="empty-state" *ngIf="stats.documents.length === 0">
+          <mat-icon>cloud_upload</mat-icon>
+          <span>Aucun document déposé</span>
         </div>
       </div>
 

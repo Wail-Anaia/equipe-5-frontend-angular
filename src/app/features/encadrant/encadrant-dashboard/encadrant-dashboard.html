@@ -1,33 +1,82 @@
-<div class="encadrant-dash">
+<div class="encadrant-dash" style="position:relative">
 
-  <!-- Header -->
+  <!-- Loading Spinner global -->
+  <app-loading-spinner
+    [loading]="loading"
+    label="Chargement de votre espace..."
+    [diameter]="44">
+  </app-loading-spinner>
+
+  <!-- Demo mode banner -->
+  <div class="demo-banner" *ngIf="demoMode() && !loading">
+    <mat-icon>info</mat-icon>
+    Mode démo — les données affichées sont des exemples.
+    <span>Le backend n'est pas disponible pour le moment.</span>
+  </div>
+
+  <!-- ── Header ───────────────────────────────────── -->
   <div class="page-header">
     <div>
-      <h1 class="page-header__title">Espace Encadrant</h1>
-      <p class="page-header__sub">Gérez vos projets et suivez vos étudiants</p>
+      <h1 class="page-header__title">
+        Espace Encadrant
+      </h1>
+      <p class="page-header__sub">
+        Bonjour {{ auth.userName() }} — Gérez vos projets et suivez vos étudiants
+      </p>
     </div>
+
+    <!-- Header stats chips -->
     <div class="header-stats" *ngIf="!loading && stats">
       <div class="header-stat">
-        <span class="header-stat__value">{{ stats.supervisedProjects.length }}</span>
-        <span class="header-stat__label">projets encadrés</span>
+        <span class="header-stat__value">
+          {{ stats.supervisedProjects.length }}
+        </span>
+        <span class="header-stat__label">
+          projet{{ stats.supervisedProjects.length > 1 ? 's' : '' }} encadré{{ stats.supervisedProjects.length > 1 ? 's' : '' }}
+        </span>
       </div>
       <div class="header-stat">
-        <span class="header-stat__value">{{ stats.followedStudents.length }}</span>
-        <span class="header-stat__label">étudiants suivis</span>
+        <span class="header-stat__value">
+          {{ stats.followedStudents?.length ?? 0 }}
+        </span>
+        <span class="header-stat__label">
+          étudiant{{ (stats.followedStudents?.length ?? 0) > 1 ? 's' : '' }} suivi{{ (stats.followedStudents?.length ?? 0) > 1 ? 's' : '' }}
+        </span>
       </div>
-      <div class="header-stat header-stat--warn" *ngIf="stats.pendingReviews > 0">
+      <div class="header-stat header-stat--warn"
+           *ngIf="stats.pendingReviews > 0">
         <span class="header-stat__value">{{ stats.pendingReviews }}</span>
         <span class="header-stat__label">en attente de révision</span>
       </div>
     </div>
   </div>
 
-  <!-- Loading -->
+  <!-- ── Mini progress bar par statut ─────────────── -->
+  <div class="status-overview" *ngIf="!loading && stats && stats.supervisedProjects.length > 0">
+    <div class="status-chip status-chip--active">
+      <mat-icon>play_circle</mat-icon>
+      <span>{{ countByStatus('EN_COURS') }} en cours</span>
+    </div>
+    <div class="status-chip status-chip--pending">
+      <mat-icon>schedule</mat-icon>
+      <span>{{ countByStatus('EN_ATTENTE') }} en attente</span>
+    </div>
+    <div class="status-chip status-chip--validated">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ countByStatus('VALIDE') }} validé{{ countByStatus('VALIDE') > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="status-chip status-chip--done">
+      <mat-icon>task_alt</mat-icon>
+      <span>{{ countByStatus('TERMINE') }} terminé{{ countByStatus('TERMINE') > 1 ? 's' : '' }}</span>
+    </div>
+  </div>
+
+  <!-- ── Skeleton ──────────────────────────────────── -->
   <div class="skeleton-grid" *ngIf="loading">
     <div class="skeleton-card" *ngFor="let i of [1,2]"></div>
   </div>
 
-  <!-- Content grid -->
+  <!-- ── Main content ──────────────────────────────── -->
   <div class="main-grid" *ngIf="!loading && stats">
 
     <!-- Projets encadrés -->
@@ -43,23 +92,39 @@
       </div>
 
       <div class="project-table">
+        <!-- Thead -->
         <div class="project-row project-row--header">
           <span>Projet</span>
           <span>Statut</span>
           <span>Dernière MÀJ</span>
         </div>
+
+        <!-- Rows -->
         <a class="project-row"
            *ngFor="let p of stats.supervisedProjects"
            [routerLink]="['/supervised', p.id]">
+
           <div class="project-name-cell">
-            <div class="project-dot"></div>
-            <span>{{ p.titre }}</span>
+            <div class="project-dot"
+                 [class]="'project-dot--' + p.statut">
+            </div>
+            <span [title]="p.titre">{{ p.titre }}</span>
           </div>
+
           <span class="status-badge" [class]="getStatutClass(p.statut)">
             {{ getStatutLabel(p.statut) }}
           </span>
-          <span class="project-date">{{ p.updatedAt | date:'dd/MM/yyyy' }}</span>
+
+          <span class="project-date">
+            {{ p.updatedAt | date:'dd/MM/yyyy' }}
+          </span>
         </a>
+
+        <!-- Empty -->
+        <div class="empty-state" *ngIf="stats.supervisedProjects.length === 0">
+          <mat-icon>folder_off</mat-icon>
+          <span>Aucun projet encadré</span>
+        </div>
       </div>
 
       <a routerLink="/supervised" class="card__footer-link">
@@ -77,21 +142,50 @@
           </div>
           <h2 class="card__title">Étudiants suivis</h2>
         </div>
-        <span class="card__count">{{ stats.followedStudents.length }}</span>
+        <span class="card__count">
+          {{ stats.followedStudents?.length ?? 0 }}
+        </span>
       </div>
 
       <div class="student-list">
-        <div class="student-item" *ngFor="let s of stats.followedStudents">
-          <div class="student-avatar">{{ getInitials(s.nom) }}</div>
+        <div class="student-item"
+             *ngFor="let s of stats.followedStudents; let i = index">
+
+          <div class="student-avatar"
+               [style.background]="'linear-gradient(135deg,' + getAvatarColor(i) + ',' + getAvatarColor(i) + 'cc)'">
+            {{ getInitials(s.nom) }}
+          </div>
+
           <div class="student-body">
             <span class="student-name">{{ s.nom }}</span>
-            <span class="student-project">{{ s.projet }}</span>
+            <span class="student-project" [title]="s.projet">
+              <mat-icon style="font-size:12px;vertical-align:middle">folder</mat-icon>
+              {{ s.projet }}
+            </span>
           </div>
-          <a class="student-contact" [href]="'mailto:' + s.email" matTooltip="Contacter">
-            <mat-icon>email</mat-icon>
-          </a>
+
+          <div class="student-actions">
+            <a class="student-contact"
+               [href]="'mailto:' + s.email"
+               title="Envoyer un email">
+              <mat-icon>email</mat-icon>
+            </a>
+          </div>
+        </div>
+
+        <!-- Empty -->
+        <div class="empty-state"
+             *ngIf="!stats.followedStudents || stats.followedStudents.length === 0">
+          <mat-icon>group_off</mat-icon>
+          <span>Aucun étudiant suivi</span>
         </div>
       </div>
+
+      <!-- Refresh -->
+      <button class="card__footer-link" (click)="loadStats()" style="border:none;cursor:pointer;width:100%;text-align:left">
+        <mat-icon>refresh</mat-icon>
+        Actualiser
+      </button>
     </section>
 
   </div>
