@@ -1,42 +1,51 @@
-<!-- ════════════════════════════════════════════════════
-     ADMIN DASHBOARD
-     ════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════
+     ADMIN DASHBOARD — UniPFE
+     ══════════════════════════════════════════════════════ -->
 
 <div class="admin-dash">
 
-  <!-- ── Page header ──────────────────────────────────── -->
+  <!-- ── Page header ─────────────────────────────────── -->
   <div class="page-header">
     <div class="page-header__left">
       <h1 class="page-header__title">Tableau de bord</h1>
       <p class="page-header__sub">Vue d'ensemble de la plateforme académique</p>
     </div>
     <div class="page-header__actions">
-      <button class="btn-refresh" (click)="loadStats()" title="Actualiser">
-        <mat-icon>refresh</mat-icon>
+      <button class="btn-refresh" (click)="loadStats()" [disabled]="loading" title="Actualiser">
+        <mat-icon [class.spinning]="loading">refresh</mat-icon>
         Actualiser
       </button>
     </div>
   </div>
 
-  <!-- ── Loading skeleton ─────────────────────────────── -->
+  <!-- ── Demo banner ──────────────────────────────────── -->
+  <div class="demo-banner" *ngIf="!loading && !stats">
+    <mat-icon>info</mat-icon>
+    <span>Mode démo — connectez le backend Spring Boot pour voir les vraies statistiques.</span>
+  </div>
+
+  <!-- ── Skeleton loading ─────────────────────────────── -->
   <div class="skeleton-grid" *ngIf="loading">
     <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
   </div>
 
   <!-- ── Stat cards ───────────────────────────────────── -->
   <div class="stats-grid" *ngIf="!loading">
-    <div class="stat-card" [class]="card.colorClass"
-         *ngFor="let card of statCards; let i = index"
-         [routerLink]="card.route"
-         [class.stat-card--clickable]="card.route"
-         [style.animation-delay]="i * 80 + 'ms'">
+    <a class="stat-card"
+       *ngFor="let card of statCards; let i = index"
+       [class]="card.colorClass"
+       [class.stat-card--clickable]="!!card.route"
+       [routerLink]="card.route ?? null"
+       [style.animation-delay]="i * 80 + 'ms'">
 
       <div class="stat-card__top">
         <div class="stat-card__icon-wrap">
           <mat-icon>{{ card.icon }}</mat-icon>
         </div>
-        <div class="stat-card__trend" *ngIf="card.trend !== undefined"
-             [class.trend-up]="card.trendUp" [class.trend-down]="!card.trendUp">
+        <div class="stat-card__trend"
+             *ngIf="card.trend !== undefined"
+             [class.trend-up]="card.trendUp"
+             [class.trend-down]="!card.trendUp">
           <mat-icon>{{ card.trendUp ? 'trending_up' : 'trending_down' }}</mat-icon>
           <span>+{{ card.trend }}%</span>
         </div>
@@ -49,13 +58,13 @@
       </div>
 
       <div class="stat-card__bar"></div>
-    </div>
+    </a>
   </div>
 
-  <!-- ── Main content grid ───────────────────────────── -->
+  <!-- ── Main content grid ────────────────────────────── -->
   <div class="main-grid" *ngIf="!loading">
 
-    <!-- Recent Activity -->
+    <!-- Journal d'activité récent -->
     <section class="card activity-card">
       <div class="card__header">
         <div class="card__header-left">
@@ -67,7 +76,8 @@
 
       <div class="activity-list">
         <div class="activity-item" *ngFor="let act of recentActivities">
-          <div class="activity-icon" [style.background]="act.color + '18'"
+          <div class="activity-icon"
+               [style.background]="act.color + '18'"
                [style.border-color]="act.color + '30'">
             <mat-icon [style.color]="act.color">{{ act.icon }}</mat-icon>
           </div>
@@ -80,10 +90,15 @@
             <span class="activity-time">{{ act.time }}</span>
           </div>
         </div>
+
+        <div class="empty-state" *ngIf="recentActivities.length === 0">
+          <mat-icon>history</mat-icon>
+          <span>Aucune activité récente</span>
+        </div>
       </div>
     </section>
 
-    <!-- Quick Actions -->
+    <!-- Actions rapides + mini stats -->
     <section class="card quick-card">
       <div class="card__header">
         <div class="card__header-left">
@@ -96,7 +111,8 @@
         <a class="quick-action"
            *ngFor="let action of quickActions"
            [routerLink]="action.route">
-          <div class="quick-action__icon" [style.background]="action.color + '18'"
+          <div class="quick-action__icon"
+               [style.background]="action.color + '18'"
                [style.border-color]="action.color + '30'">
             <mat-icon [style.color]="action.color">{{ action.icon }}</mat-icon>
           </div>
@@ -104,19 +120,27 @@
         </a>
       </div>
 
-      <!-- Mini stats panel -->
+      <!-- Mini stats — données réelles ou démo -->
       <div class="mini-stats">
         <div class="mini-stat">
           <span class="mini-stat__label">Projets en attente</span>
-          <span class="mini-stat__value mini-stat__value--warn">7</span>
-        </div>
-        <div class="mini-stat">
-          <span class="mini-stat__label">Comptes inactifs</span>
-          <span class="mini-stat__value mini-stat__value--danger">3</span>
+          <span class="mini-stat__value mini-stat__value--warn">{{ pendingProjects }}</span>
         </div>
         <div class="mini-stat">
           <span class="mini-stat__label">Projets terminés</span>
-          <span class="mini-stat__value mini-stat__value--success">14</span>
+          <span class="mini-stat__value mini-stat__value--success">{{ closedProjects }}</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat__label">Projets actifs</span>
+          <span class="mini-stat__value mini-stat__value--active">{{ activeProjects }}</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat__label">Projets valides</span>
+          <span class="mini-stat__value mini-stat__value--success">{{ valideProjects }}</span>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat__label">Projets rejete</span>
+          <span class="mini-stat__value mini-stat__value--danger ">{{ rejeteProjects }}</span>
         </div>
       </div>
     </section>

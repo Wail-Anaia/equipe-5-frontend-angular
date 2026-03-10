@@ -1,11 +1,73 @@
-<div style="font-family:'DM Sans',sans-serif">
-      <h1 style="font-family:'Instrument Serif',serif;font-size:1.9rem;font-weight:400;color:#0f172a;margin:0 0 8px;letter-spacing:-0.02em">
-        Mes projets
-      </h1>
-      <p style="color:#64748b;font-size:0.85rem;margin:0 0 28px">Vos projets personnels et soumissions</p>
-      <div style="background:white;border-radius:16px;border:1px solid #eef0f6;padding:48px;text-align:center;color:#94a3b8">
-        <mat-icon style="font-size:48px;display:block;margin:0 auto 12px;opacity:0.4">book</mat-icon>
-        <p style="font-size:0.9rem;margin:0">Fonctionnalité disponible dans le Sprint 2</p>
-        <a routerLink="/dashboard" style="display:inline-block;margin-top:16px;font-size:0.8rem;color:#6C63FF;text-decoration:none">← Retour au tableau de bord</a>
+<div class="my-projects">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Mes projets</h1>
+      <p class="page-sub">Suivez l'avancement de vos projets académiques</p>
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="skeleton-list" *ngIf="loading">
+    <div class="skel-card" *ngFor="let i of [1,2]"></div>
+  </div>
+
+  <!-- Cards -->
+  <div class="project-cards" *ngIf="!loading">
+    <div class="proj-card" *ngFor="let p of projects">
+      <div class="proj-card__header">
+        <div class="proj-icon"><mat-icon>school</mat-icon></div>
+        <div>
+          <h2 class="proj-title">{{ p.titre }}</h2>
+          <div class="proj-meta">
+            <span class="status-badge" [class]="css(p.statut)">
+              <span class="dot"></span>{{ label(p.statut) }}
+            </span>
+            <span *ngIf="p.team" class="team-chip"><mat-icon>group</mat-icon>{{ p.team.nom }}</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="proj-desc">{{ p.description }}</p>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Avancement</span>
+          <span>{{ progress(p.statut) }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progress(p.statut)"
+               [class]="css(p.statut)"></div>
+        </div>
+      </div>
+
+      <!-- Technologies -->
+      <div class="tech-list" *ngIf="p.technologies">
+        <span class="tech-tag" *ngFor="let t of techs(p.technologies)">{{ t }}</span>
+      </div>
+
+      <!-- Encadrant -->
+      <div class="encadrant-row" *ngIf="p.encadrant">
+        <div class="mini-avatar">{{ p.encadrant.nom.charAt(0) }}</div>
+        <div>
+          <div class="enc-label">Encadrant</div>
+          <div class="enc-name">{{ p.encadrant.nom }}</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="update-date">MÀJ {{ p.updatedAt | date:'dd/MM/yyyy' }}</span>
+        <a [routerLink]="['/my-projects', p.id]" class="btn-detail">
+          Voir le détail <mat-icon>arrow_forward</mat-icon>
+        </a>
       </div>
     </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="projects.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <p>Aucun projet assigné pour le moment.</p>
+    </div>
+  </div>
+</div>

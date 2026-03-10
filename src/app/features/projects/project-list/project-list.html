@@ -1,11 +1,79 @@
-<div style="font-family:'DM Sans',sans-serif">
-      <h1 style="font-family:'Instrument Serif',serif;font-size:1.9rem;font-weight:400;color:#0f172a;margin:0 0 8px;letter-spacing:-0.02em">
-        Projets
-      </h1>
-      <p style="color:#64748b;font-size:0.85rem;margin:0 0 28px">Liste de tous les projets de la plateforme</p>
-      <div style="background:white;border-radius:16px;border:1px solid #eef0f6;padding:48px;text-align:center;color:#94a3b8">
-        <mat-icon style="font-size:48px;display:block;margin:0 auto 12px;opacity:0.4">folder_special</mat-icon>
-        <p style="font-size:0.9rem;margin:0">Fonctionnalité disponible dans le Sprint 2</p>
-        <a routerLink="/dashboard" style="display:inline-block;margin-top:16px;font-size:0.8rem;color:#6C63FF;text-decoration:none">← Retour au tableau de bord</a>
+<div class="project-list">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Projets</h1>
+      <p class="page-sub">{{ total }} projet(s) enregistré(s)</p>
+    </div>
+    <a class="btn-primary" routerLink="/projects/new">
+      <mat-icon>add</mat-icon> Nouveau projet
+    </a>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters">
+    <div class="search-wrap">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input class="search-input" [(ngModel)]="search" placeholder="Titre, technologie...">
+      <button class="clear-btn" *ngIf="search" (click)="search=''"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="statut-pills">
+      <button *ngFor="let s of statutOptions"
+              class="pill" [class.pill--active]="filterStatut === s.value"
+              (click)="filterStatut = s.value"
+              [style.--pill-color]="s.color">
+        {{ s.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="cards-grid" *ngIf="loading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+  </div>
+
+  <!-- Grid -->
+  <div class="cards-grid" *ngIf="!loading">
+    <div class="project-card" *ngFor="let p of filtered">
+      <div class="project-card__top">
+        <div class="project-card__icon"><mat-icon>folder_special</mat-icon></div>
+        <div class="status-badge" [class]="css(p.statut)">
+          <div class="dot" [style.background]="dot(p.statut)"></div>
+          {{ label(p.statut) }}
+        </div>
+      </div>
+      <h3 class="project-card__title">{{ p.titre }}</h3>
+      <p class="project-card__desc">{{ p.description }}</p>
+      <div class="project-card__tech">
+        <span class="tech-tag" *ngFor="let t of techs(p.technologies)">{{ t }}</span>
+      </div>
+      <div class="project-card__footer">
+        <div class="encadrant-info" *ngIf="p.encadrant">
+          <div class="mini-avatar">{{ p.encadrant.nom.charAt(0) }}</div>
+          <span>{{ p.encadrant.nom }}</span>
+        </div>
+        <div class="card-actions">
+          <a [routerLink]="['/projects', p.id]" class="action-btn action-btn--view" matTooltip="Détails">
+            <mat-icon>visibility</mat-icon>
+          </a>
+          <button class="action-btn action-btn--delete" matTooltip="Supprimer" (click)="delete(p)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
       </div>
     </div>
+
+    <!-- Empty -->
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <mat-icon>folder_off</mat-icon>
+      <span>Aucun projet trouvé</span>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!loading && totalPages > 1">
+    <button class="page-btn" [disabled]="page === 0" (click)="prevPage()"><mat-icon>chevron_left</mat-icon></button>
+    <span class="page-info">Page {{ page+1 }} / {{ totalPages }}</span>
+    <button class="page-btn" [disabled]="page >= totalPages-1" (click)="nextPage()"><mat-icon>chevron_right</mat-icon></button>
+  </div>
+</div>

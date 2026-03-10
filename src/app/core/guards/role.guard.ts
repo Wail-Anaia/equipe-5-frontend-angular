@@ -1,16 +1,18 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
-import { Role } from '../auth/auth.model';
+import { inject }          from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService }     from '../auth/auth.service';
+import { Role }            from '../models/api.models';
 
-export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
-  const auth     = inject(AuthService);
-  const router   = inject(Router);
-  const required = route.data['roles'] as Role[];
+export const roleGuard: CanActivateFn = (route, _state) => {
+  const auth   = inject(AuthService);
+  const router = inject(Router);
 
-  if (required && required.includes(auth.role()!)) {
-    return true;
-  }
+  const allowedRoles = route.data['roles'] as Role[] | undefined;
+  const userRole     = auth.role();
+
+  if (!allowedRoles || !allowedRoles.length) return true;
+
+  if (userRole && allowedRoles.includes(userRole)) return true;
 
   router.navigate(['/unauthorized']);
   return false;
