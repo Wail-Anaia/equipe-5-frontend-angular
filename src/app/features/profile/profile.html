@@ -55,9 +55,9 @@
         <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
 
           <div class="field-group" [class.field-group--error]="isInvalid('currentPassword')">
-            <label class="field-label">Mot de passe actuel</label>
+            <label for="currentPassword" class="field-label">Mot de passe actuel</label>
             <div class="field-wrap">
-              <input [type]="hideOld ? 'password' : 'text'"
+              <input id="currentPassword" name="currentPassword" [type]="hideOld ? 'password' : 'text'"
                      formControlName="currentPassword" class="field-input" placeholder="••••••••">
               <button type="button" class="field-toggle" (click)="hideOld = !hideOld">
                 <mat-icon>{{ hideOld ? 'visibility_off' : 'visibility' }}</mat-icon>
@@ -67,9 +67,9 @@
           </div>
 
           <div class="field-group" [class.field-group--error]="isInvalid('newPassword')">
-            <label class="field-label">Nouveau mot de passe</label>
+            <label for="newPassword" class="field-label">Nouveau mot de passe</label>
             <div class="field-wrap">
-              <input [type]="hideNew ? 'password' : 'text'"
+              <input id="newPassword" name="newPassword" [type]="hideNew ? 'password' : 'text'"
                      formControlName="newPassword" class="field-input" placeholder="Minimum 6 caractères">
               <button type="button" class="field-toggle" (click)="hideNew = !hideNew">
                 <mat-icon>{{ hideNew ? 'visibility_off' : 'visibility' }}</mat-icon>

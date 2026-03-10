@@ -1,11 +1,96 @@
-<div style="font-family:'DM Sans',sans-serif">
-      <h1 style="font-family:'Instrument Serif',serif;font-size:1.9rem;font-weight:400;color:#0f172a;margin:0 0 8px;letter-spacing:-0.02em">
-        Projets encadrés
-      </h1>
-      <p style="color:#64748b;font-size:0.85rem;margin:0 0 28px">Tous les projets que vous encadrez</p>
-      <div style="background:white;border-radius:16px;border:1px solid #eef0f6;padding:48px;text-align:center;color:#94a3b8">
-        <mat-icon style="font-size:48px;display:block;margin:0 auto 12px;opacity:0.4">supervised_user_circle</mat-icon>
-        <p style="font-size:0.9rem;margin:0">Fonctionnalité disponible dans le Sprint 2</p>
-        <a routerLink="/dashboard" style="display:inline-block;margin-top:16px;font-size:0.8rem;color:#6C63FF;text-decoration:none">← Retour au tableau de bord</a>
-      </div>
+<div class="supervised-page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Projets encadrés</h1>
+      <p class="page-sub">{{ projects.length }} projet(s) sous votre encadrement</p>
     </div>
+  </div>
+
+  <!-- Stats rapides -->
+  <div class="quick-stats" *ngIf="!loading">
+    <div class="qs-card qs-card--green">
+      <mat-icon>play_circle</mat-icon>
+      <div class="qs-value">{{ count('EN_COURS') }}</div>
+      <div class="qs-label">En cours</div>
+    </div>
+    <div class="qs-card qs-card--amber">
+      <mat-icon>hourglass_empty</mat-icon>
+      <div class="qs-value">{{ count('EN_ATTENTE') }}</div>
+      <div class="qs-label">En attente</div>
+    </div>
+    <div class="qs-card qs-card--blue">
+      <mat-icon>verified</mat-icon>
+      <div class="qs-value">{{ count('VALIDE') }}</div>
+      <div class="qs-label">Validés</div>
+    </div>
+    <div class="qs-card qs-card--violet">
+      <mat-icon>done_all</mat-icon>
+      <div class="qs-value">{{ count('TERMINE') }}</div>
+      <div class="qs-label">Terminés</div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input class="search-input" [(ngModel)]="search" placeholder="Rechercher un projet...">
+    </div>
+    <select class="statut-select" [(ngModel)]="filterStatut">
+      <option *ngFor="let s of statutOptions" [value]="s.value">{{ s.label }}</option>
+    </select>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="skel-list" *ngIf="loading">
+    <div class="skel-row" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading">
+    <table class="proj-table">
+      <thead>
+        <tr>
+          <th>Projet</th>
+          <th>Équipe</th>
+          <th>Technologies</th>
+          <th>Statut</th>
+          <th>Mise à jour</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filtered">
+          <td class="td-title">{{ p.titre }}</td>
+          <td class="td-team">
+            <span *ngIf="p.team" class="team-chip">
+              <mat-icon>group</mat-icon> {{ p.team.nom }}
+            </span>
+            <span *ngIf="!p.team" class="no-team">—</span>
+          </td>
+          <td class="td-tech">
+            <span class="tech-tag" *ngFor="let t of techs(p.technologies)">{{ t }}</span>
+          </td>
+          <td>
+            <span class="status-badge" [class]="css(p.statut)">
+              <span class="dot" [style.background]="dot(p.statut)"></span>
+              {{ label(p.statut) }}
+            </span>
+          </td>
+          <td class="td-date">{{ p.updatedAt | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <a [routerLink]="['/supervised', p.id]" class="view-btn" matTooltip="Voir le détail">
+              <mat-icon>visibility</mat-icon>
+            </a>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="6" class="empty-row">
+            <mat-icon>folder_off</mat-icon> Aucun projet trouvé
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

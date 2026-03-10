@@ -1,124 +1,136 @@
-<div class="user-list">
+<div style="font-family:'DM Sans',sans-serif;position:relative">
+      <app-loading-spinner [loading]="loading" label="Chargement..."></app-loading-spinner>
 
-  <!-- Header -->
-  <div class="page-header">
-    <div>
-      <h1 class="page-header__title">Gestion des utilisateurs</h1>
-      <p class="page-header__sub">{{ total }} compte(s) enregistré(s) sur la plateforme</p>
-    </div>
-    <a class="btn-primary" routerLink="/users/create">
-      <mat-icon>person_add</mat-icon>
-      Créer un compte
-    </a>
-  </div>
+      <!-- Header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px">
+        <div>
+          <h1 style="font-family:'Instrument Serif',serif;font-size:1.9rem;font-weight:400;color:#0f172a;margin:0;letter-spacing:-0.02em">
+            Utilisateurs
+          </h1>
+          <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0">
+            {{ totalElements }} comptes enregistrés
+          </p>
+        </div>
+        <a routerLink="/users/create"
+           style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;background:linear-gradient(135deg,#6C63FF,#4338ca);color:white;text-decoration:none;font-size:0.84rem;font-weight:600;box-shadow:0 4px 12px rgba(108,99,255,0.3)">
+          <mat-icon style="font-size:18px">person_add</mat-icon>
+          Nouveau compte
+        </a>
+      </div>
 
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <div class="search-wrap">
-      <mat-icon class="search-icon">search</mat-icon>
-      <input class="search-input" type="text" [(ngModel)]="search"
-             placeholder="Rechercher par nom, email ou rôle...">
-      <button class="search-clear" *ngIf="search" (click)="search = ''">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-    <button class="btn-icon" (click)="loadUsers()" matTooltip="Actualiser">
-      <mat-icon>refresh</mat-icon>
-    </button>
-  </div>
+      <!-- Search -->
+      <div style="margin-bottom:20px">
+        <div style="position:relative;max-width:360px">
+          <mat-icon style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:18px">search</mat-icon>
+          <input [(ngModel)]="searchQuery"
+                 (ngModelChange)="onSearch($event)"
+                 type="text"
+                 placeholder="Rechercher par nom ou email..."
+                 style="width:100%;padding:10px 16px 10px 38px;border-radius:10px;border:1.5px solid #e2e8f0;font-family:'DM Sans',sans-serif;font-size:0.84rem;outline:none;background:#f8faff">
+        </div>
+      </div>
 
-  <!-- Loading skeleton -->
-  <div class="table-skeleton" *ngIf="loading">
-    <div class="skel-row" *ngFor="let i of [1,2,3,4,5]"></div>
-  </div>
+      <!-- Table -->
+      <div style="background:white;border-radius:16px;border:1px solid #eef0f6;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+          <thead>
+            <tr style="background:#f8faff;border-bottom:1px solid #eef0f6">
+              <th style="padding:12px 16px;text-align:left;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8">Utilisateur</th>
+              <th style="padding:12px 16px;text-align:left;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8">Email</th>
+              <th style="padding:12px 16px;text-align:left;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8">Rôle</th>
+              <th style="padding:12px 16px;text-align:left;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8">Statut</th>
+              <th style="padding:12px 16px;text-align:left;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8">Créé le</th>
+              <th style="padding:12px 16px;text-align:center;font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#94a3b8">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users"
+                style="border-bottom:1px solid #f1f5f9;transition:background 150ms"
+                onmouseover="this.style.background='#fafbff'"
+                onmouseout="this.style.background=''">
 
-  <!-- Table -->
-  <div class="table-wrap" *ngIf="!loading">
-    <table class="users-table">
-      <thead>
-        <tr>
-          <th>Utilisateur</th>
-          <th>Email</th>
-          <th>Rôle</th>
-          <th>Statut</th>
-          <th>Créé le</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of filteredUsers">
+              <!-- Avatar + Nom -->
+              <td style="padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div [style.background]="getRoleColor(user.role)"
+                       style="width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;font-weight:700;flex-shrink:0">
+                    {{ user.nom.charAt(0).toUpperCase() }}
+                  </div>
+                  <a [routerLink]="['/users', user.id]"
+                     style="font-size:0.84rem;font-weight:600;color:#1e293b;text-decoration:none">
+                    {{ user.nom }}
+                  </a>
+                </div>
+              </td>
 
-          <!-- Utilisateur -->
-          <td class="td-user">
-            <div class="user-cell">
-              <div class="user-avatar" [class.user-avatar--inactive]="!user.actif">
-                {{ getInitials(user.nom) }}
-              </div>
-              <span class="user-name">{{ user.nom }}</span>
-            </div>
-          </td>
+              <td style="padding:14px 16px;color:#475569">{{ user.email }}</td>
 
-          <!-- Email -->
-          <td class="td-email">
-            <a [href]="'mailto:' + user.email" class="email-link">{{ user.email }}</a>
-          </td>
+              <!-- Rôle badge -->
+              <td style="padding:14px 16px">
+                <span [style.background]="getRoleColor(user.role) + '18'"
+                      [style.color]="getRoleColor(user.role)"
+                      style="font-size:0.65rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px">
+                  {{ user.role }}
+                </span>
+              </td>
 
-          <!-- Rôle -->
-          <td>
-            <span class="role-badge" [class]="getRoleClass(user.role)">{{ user.role }}</span>
-          </td>
+              <!-- Statut -->
+              <td style="padding:14px 16px">
+                <span [style.background]="user.actif ? '#d1fae5' : '#fee2e2'"
+                      [style.color]="user.actif ? '#065f46' : '#991b1b'"
+                      style="font-size:0.65rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px">
+                  {{ user.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
 
-          <!-- Statut -->
-          <td>
-            <span class="status-pill" [class.status-pill--active]="user.actif"
-                                      [class.status-pill--inactive]="!user.actif">
-              <span class="status-dot"></span>
-              {{ user.actif ? 'Actif' : 'Inactif' }}
-            </span>
-          </td>
+              <td style="padding:14px 16px;color:#94a3b8;font-size:0.76rem">
+                {{ user.createdAt | date:'dd/MM/yyyy' }}
+              </td>
 
-          <!-- Date -->
-          <td class="td-date">{{ user.createdAt | date:'dd/MM/yyyy' }}</td>
+              <!-- Actions -->
+              <td style="padding:14px 16px;text-align:center">
+                <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                  <a [routerLink]="['/users', user.id]"
+                     style="width:30px;height:30px;border-radius:7px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;color:#64748b;cursor:pointer;text-decoration:none">
+                    <mat-icon style="font-size:15px">visibility</mat-icon>
+                  </a>
+                  <button (click)="toggleStatus(user)"
+                          [style.background]="user.actif ? '#fff7ed' : '#f0fdf4'"
+                          [style.border-color]="user.actif ? '#fed7aa' : '#bbf7d0'"
+                          [style.color]="user.actif ? '#c2410c' : '#16a34a'"
+                          style="width:30px;height:30px;border-radius:7px;border:1px solid;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent">
+                    <mat-icon style="font-size:15px">{{ user.actif ? 'block' : 'check_circle' }}</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
 
-          <!-- Actions -->
-          <td class="td-actions">
-            <button class="action-btn"
-                    [class.action-btn--disable]="user.actif"
-                    [class.action-btn--enable]="!user.actif"
-                    [matTooltip]="user.actif ? 'Désactiver' : 'Activer'"
-                    (click)="toggleStatus(user)">
-              <mat-icon>{{ user.actif ? 'block' : 'check_circle' }}</mat-icon>
+            <tr *ngIf="!loading && users.length === 0">
+              <td colspan="6" style="text-align:center;padding:48px;color:#94a3b8">
+                <mat-icon style="font-size:40px;display:block;margin:0 auto 8px;opacity:0.4">group_off</mat-icon>
+                Aucun utilisateur trouvé
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid #f1f5f9">
+          <span style="font-size:0.76rem;color:#64748b">
+            Page {{ currentPage + 1 }} / {{ totalPages }} — {{ totalElements }} résultats
+          </span>
+          <div style="display:flex;gap:6px">
+            <button (click)="loadPage(currentPage - 1)"
+                    [disabled]="currentPage === 0"
+                    style="padding:5px 12px;border-radius:7px;border:1px solid #e2e8f0;background:white;font-size:0.78rem;cursor:pointer;color:#475569;disabled:opacity-50">
+              ← Précédent
             </button>
-            <button class="action-btn action-btn--view"
-                    matTooltip="Voir le profil">
-              <mat-icon>visibility</mat-icon>
+            <button (click)="loadPage(currentPage + 1)"
+                    [disabled]="currentPage >= totalPages - 1"
+                    style="padding:5px 12px;border-radius:7px;border:1px solid #e2e8f0;background:white;font-size:0.78rem;cursor:pointer;color:#475569">
+              Suivant →
             </button>
-          </td>
-
-        </tr>
-
-        <!-- Empty state -->
-        <tr *ngIf="filteredUsers.length === 0">
-          <td colspan="6" class="empty-cell">
-            <div class="empty-state">
-              <mat-icon>search_off</mat-icon>
-              <span>Aucun utilisateur trouvé</span>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="!loading && totalPages > 1">
-    <button class="page-btn" [disabled]="page === 0" (click)="prevPage()">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <span class="page-info">Page {{ page + 1 }} / {{ totalPages }}</span>
-    <button class="page-btn" [disabled]="page >= totalPages - 1" (click)="nextPage()">
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-  </div>
-
-</div>
+          </div>
+        </div>
+      </div>
+    </div>

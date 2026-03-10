@@ -29,52 +29,26 @@ export class Sidebar {
   auth = inject(AuthService);
 
   readonly navItems: NavItem[] = [
+    { label: 'Tableau de bord', icon: 'dashboard',             route: '/dashboard',  roles: ['ADMIN','ENCADRANT','ETUDIANT'] },
     {
-      label: 'Tableau de bord',
-      icon: 'dashboard',
-      route: '/dashboard',
-      roles: ['ADMIN', 'ENCADRANT', 'ETUDIANT']
-    },
-    {
-      label: 'Utilisateurs',
-      icon: 'manage_accounts',
-      route: '/users',
-      roles: ['ADMIN'],
+      label: 'Utilisateurs',    icon: 'manage_accounts',        route: '/users',      roles: ['ADMIN'],
       children: [
-        { label: 'Liste des utilisateurs', icon: 'group',      route: '/users',        roles: ['ADMIN'] },
-        { label: 'Créer un compte',        icon: 'person_add', route: '/users/create', roles: ['ADMIN'] }
+        { label: 'Liste',          icon: 'group',       route: '/users',        roles: ['ADMIN'] },
+        { label: 'Créer un compte',icon: 'person_add',  route: '/users/create', roles: ['ADMIN'] },
       ]
     },
     {
-      label: 'Projets',
-      icon: 'folder_special',
-      route: '/projects',
-      roles: ['ADMIN', 'ENCADRANT']
+      label: 'Équipes',          icon: 'groups',                route: '/teams',      roles: ['ADMIN'],
+      children: [
+        { label: 'Toutes les équipes', icon: 'group',       route: '/teams',        roles: ['ADMIN'] },
+        { label: 'Créer une équipe',   icon: 'group_add',   route: '/teams/create', roles: ['ADMIN'] },
+      ]
     },
-    {
-      label: 'Mes projets',
-      icon: 'book',
-      route: '/my-projects',
-      roles: ['ETUDIANT']
-    },
-    {
-      label: 'Projets encadrés',
-      icon: 'supervised_user_circle',
-      route: '/supervised',
-      roles: ['ENCADRANT']
-    },
-    {
-      label: 'Mes documents',
-      icon: 'description',
-      route: '/documents',
-      roles: ['ETUDIANT']
-    },
-    {
-      label: 'Journal d\'audit',
-      icon: 'receipt_long',
-      route: '/audit',
-      roles: ['ADMIN']
-    }
+    { label: 'Projets',          icon: 'folder_special',        route: '/projects',   roles: ['ADMIN','ENCADRANT'] },
+    { label: 'Mes projets',      icon: 'book',                  route: '/my-projects',roles: ['ETUDIANT'] },
+    { label: 'Projets encadrés', icon: 'supervised_user_circle',route: '/supervised', roles: ['ENCADRANT'] },
+    { label: 'Mes documents',    icon: 'description',           route: '/documents',  roles: ['ETUDIANT'] },
+    { label: 'Journal d\'audit', icon: 'receipt_long',          route: '/audit',      roles: ['ADMIN'] },
   ];
 
   expandedItems: Set<string> = new Set();
@@ -85,32 +59,16 @@ export class Sidebar {
   }
 
   toggleExpand(route: string): void {
-    if (this.expandedItems.has(route)) {
-      this.expandedItems.delete(route);
-    } else {
-      this.expandedItems.add(route);
-    }
+    this.expandedItems.has(route) ? this.expandedItems.delete(route) : this.expandedItems.add(route);
   }
 
-  isExpanded(route: string): boolean {
-    return this.expandedItems.has(route);
-  }
+  isExpanded(route: string): boolean { return this.expandedItems.has(route); }
 
   getRoleLabel(): string {
-    const map: Record<string, string> = {
-      ADMIN: 'Administrateur',
-      ENCADRANT: 'Encadrant',
-      ETUDIANT: 'Étudiant'
-    };
-    return map[this.auth.role()!] ?? '';
+    return ({ ADMIN: 'Administrateur', ENCADRANT: 'Encadrant', ETUDIANT: 'Étudiant' } as Record<string, string>)[this.auth.role()!] ?? '';
   }
 
   getRoleBadgeClass(): string {
-    const map: Record<string, string> = {
-      ADMIN: 'badge-admin',
-      ENCADRANT: 'badge-encadrant',
-      ETUDIANT: 'badge-etudiant'
-    };
-    return map[this.auth.role()!] ?? '';
+    return ({ ADMIN: 'badge-admin', ENCADRANT: 'badge-encadrant', ETUDIANT: 'badge-etudiant' } as Record<string, string>)[this.auth.role()!] ?? '';
   }
 }
