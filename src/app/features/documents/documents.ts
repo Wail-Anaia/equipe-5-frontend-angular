@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { environment } from '../../../environments/environment';
 
 interface DocumentItem {
   id: number;
@@ -36,7 +37,7 @@ export class Documents implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.http.get<DocumentItem[]>('/api/documents/my').subscribe({
+    this.http.get<DocumentItem[]>(`${environment.apiUrl}/documents/my`).subscribe({
       next:  d  => { this.documents = d; this.loading = false; },
       error: () => { this.documents = this.demo; this.loading = false; }
     });

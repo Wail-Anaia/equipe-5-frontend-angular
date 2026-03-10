@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule }         from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink }   from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { MatIconModule }                from '@angular/material/icon';
+import { MatIconModule }        from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { environment } from '../../../../environments/environment';
 
 type Role = 'ADMIN' | 'ENCADRANT' | 'ETUDIANT';
 
@@ -19,9 +20,9 @@ type Role = 'ADMIN' | 'ENCADRANT' | 'ETUDIANT';
     MatSnackBarModule
   ],
   templateUrl: './create-user.html',
-  styleUrls: ['./create-user.scss']
+  styleUrls:   ['./create-user.scss']
 })
-export class CreateUser {
+export class CreateUserComponent {
 
   private fb     = inject(FormBuilder);
   private http   = inject(HttpClient);
@@ -33,9 +34,9 @@ export class CreateUser {
   submitted    = false;
 
   readonly roles: { value: Role; label: string; icon: string; desc: string }[] = [
-    { value: 'ETUDIANT',  label: 'Étudiant',   icon: 'school',               desc: 'Accès limité à ses projets et documents' },
-    { value: 'ENCADRANT', label: 'Encadrant',  icon: 'supervisor_account',   desc: 'Encadre et suit les projets étudiants'   },
-    { value: 'ADMIN',     label: 'Admin',      icon: 'admin_panel_settings', desc: 'Accès complet à la plateforme'           },
+    { value: 'ETUDIANT',  label: 'Étudiant',   icon: 'school',               desc: 'Accès limité à ses projets'         },
+    { value: 'ENCADRANT', label: 'Encadrant',  icon: 'supervisor_account',   desc: 'Encadre les projets étudiants'      },
+    { value: 'ADMIN',     label: 'Admin',      icon: 'admin_panel_settings',  desc: 'Accès complet à la plateforme'      },
   ];
 
   form = this.fb.nonNullable.group({
@@ -45,33 +46,53 @@ export class CreateUser {
     role:     ['ETUDIANT' as Role, Validators.required]
   });
 
+  // ── Submit ──────────────────────────────────────────
   submit(): void {
     this.submitted = true;
     if (this.form.invalid || this.loading) return;
 
     this.loading = true;
 
-    this.http.post('/api/users', this.form.getRawValue()).subscribe({
-      next: (user: any) => {
+    // ✅ Appel direct HttpClient — pas besoin de UserService ici
+    this.http.post<{ nom: string; email: string; id: number }>(
+      `${environment.apiUrl}/users`,
+      this.form.getRawValue()
+    ).subscribe({
+      next: user => {
         this.loading = false;
         this.snack.open(
           `✅ Compte créé pour ${user?.nom ?? this.form.value.nom}`,
           'Fermer',
-          { duration: 5000, panelClass: 'snack-success', horizontalPosition: 'center', verticalPosition: 'top' }
+          {
+            duration: 5000,
+            panelClass: 'snack-success',
+            horizontalPosition: 'center',
+            verticalPosition: 'top'
+          }
         );
         this.router.navigate(['/users']);
       },
       error: (err: HttpErrorResponse) => {
         this.loading = false;
-        const msg = err.error?.error
-          ?? Object.values(err.error?.details ?? {}).join(' | ')
-          ?? 'Erreur lors de la création.';
+        const body = err.error;
+        const msg =
+          body?.error ??
+          (body?.details ? Object.values(body.details).join(' | ') : null) ??
+          'Erreur lors de la création du compte.';
+
         this.snack.open(msg, 'Fermer', {
-          duration: 5000, panelClass: 'snack-error',
-          horizontalPosition: 'center', verticalPosition: 'top'
+          duration: 6000,
+          panelClass: 'snack-error',
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
         });
       }
     });
+  }
+
+  // ── Helpers formulaire ──────────────────────────────
+  selectRole(role: Role): void {
+    this.form.patchValue({ role });
   }
 
   isInvalid(field: string): boolean {
@@ -89,10 +110,7 @@ export class CreateUser {
     return 'Valeur invalide';
   }
 
-  selectRole(role: Role): void {
-    this.form.patchValue({ role });
-  }
-
+  // ── Password strength ───────────────────────────────
   get passwordStrength(): number {
     const pw = this.form.get('password')?.value ?? '';
     let score = 0;

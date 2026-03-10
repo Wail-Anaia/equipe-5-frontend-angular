@@ -47,14 +47,14 @@ export const routes: Routes = [
             path: '',
             loadComponent: () =>
               import('./features/users/user-list/user-list')
-                .then(m => m.UserList),
+                .then(m => m.UserListComponent),
             title: 'Utilisateurs — UniPFE'
           },
           {
             path: 'create',
             loadComponent: () =>
               import('./features/users/create-user/create-user')
-                .then(m => m.CreateUser),
+                .then(m => m.CreateUserComponent),
             title: 'Créer un compte — UniPFE'
           },
           {
@@ -77,7 +77,7 @@ export const routes: Routes = [
             path: '',
             loadComponent: () =>
               import('./features/projects/project-list/project-list')
-                .then(m => m.ProjectList),
+                .then(m => m.ProjectListComponent),
             title: 'Projets — UniPFE'
           },
           {
@@ -86,7 +86,7 @@ export const routes: Routes = [
             data: { roles: ['ADMIN'] },
             loadComponent: () =>
               import('./features/projects/project-create/project-create')
-                .then(m => m.ProjectCreate),
+                .then(m => m.ProjectCreateComponent),
             title: 'Nouveau projet — UniPFE'
           },
           {
@@ -109,7 +109,7 @@ export const routes: Routes = [
             path: '',
             loadComponent: () =>
               import('./features/projects/my-projects/my-projects')
-                .then(m => m.MyProjects),
+                .then(m => m.MyProjectsComponent),
             title: 'Mes projets — UniPFE'
           },
           {
@@ -132,7 +132,7 @@ export const routes: Routes = [
             path: '',
             loadComponent: () =>
               import('./features/projects/supervised/supervised')
-                .then(m => m.Supervised),
+                .then(m => m.SupervisedComponent),
             title: 'Projets encadrés — UniPFE'
           },
           {

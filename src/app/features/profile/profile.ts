@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth/auth.service';
 
+import { environment } from '../../../environments/environment';
+
 
 @Component({
   selector: 'app-profile',
@@ -51,7 +53,7 @@ export class Profile {
     if (this.passwordForm.invalid || this.loading) return;
     this.loading = true;
 
-    this.http.patch('/api/users/me/password', this.passwordForm.getRawValue()).subscribe({
+    this.http.patch(`${environment.apiUrl}/users/me/password`, this.passwordForm.getRawValue()).subscribe({
       next: () => {
         this.loading = false;
         this.submitted = false;
