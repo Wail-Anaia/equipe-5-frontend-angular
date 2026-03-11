@@ -71,7 +71,8 @@ export const routes: Routes = [
       {
         path: 'teams', canActivate: [roleGuard], data: { roles: ['ADMIN'] },
         children: [
-          { path: 'create',  loadComponent: () => import('./features/teams/team-create/team-create').then(m => m.TeamCreateComponent) },
+          { path: '',        loadComponent: () => import('./features/teams/team-list/team-list').then(m => m.TeamListComponent), title: 'Team list — UniPFE' },
+          { path: 'create',  loadComponent: () => import('./features/teams/team-create/team-create').then(m => m.TeamCreateComponent), title: 'Team create — UniPFE' },
         ]
       },
 

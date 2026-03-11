@@ -1,0 +1,71 @@
+<div class="team-list">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Équipes</h1>
+      <p class="page-sub">{{ filtered.length }} équipe(s) sur la plateforme</p>
+    </div>
+    <a class="btn-primary" routerLink="/teams/create">
+      <mat-icon>group_add</mat-icon> Créer une équipe
+    </a>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <mat-icon class="search-icon">search</mat-icon>
+    <input class="search-input" [(ngModel)]="search" placeholder="Rechercher par nom d'équipe...">
+  </div>
+
+  <!-- Skeleton -->
+  <div class="cards-grid" *ngIf="loading">
+    <div class="skel-card" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards-grid" *ngIf="!loading">
+    <div class="team-card" *ngFor="let t of filtered">
+      <div class="team-card__header">
+        <div class="team-avatar">{{ initials(t.nom) }}</div>
+        <div>
+          <h3 class="team-name">{{ t.nom }}</h3>
+          <span class="member-count">{{ t.membres.length }} membre(s)</span>
+        </div>
+        <div class="team-actions">
+          <a [routerLink]="['/teams', t.id]" class="action-btn action-btn--view" matTooltip="Gérer">
+            <mat-icon>settings</mat-icon>
+          </a>
+          <button class="action-btn action-btn--delete" matTooltip="Supprimer" (click)="delete(t)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Membres -->
+      <div class="members-list">
+        <div class="member-item" *ngFor="let m of t.membres">
+          <div class="member-avatar" [class.member-avatar--inactive]="!m.actif">
+            {{ initials(m.nom) }}
+          </div>
+          <div class="member-info">
+            <span class="member-name">{{ m.nom }}</span>
+            <span class="member-email">{{ m.email }}</span>
+          </div>
+          <span class="member-status" [class.member-status--active]="m.actif" [class.member-status--inactive]="!m.actif">
+            {{ m.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </div>
+        <div class="no-members" *ngIf="t.membres.length === 0">Aucun membre pour l'instant</div>
+      </div>
+
+      <div class="team-footer">
+        <mat-icon>calendar_today</mat-icon>
+        Créée le {{ t.createdAt | date:'dd/MM/yyyy' }}
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <mat-icon>groups</mat-icon>
+      <p>Aucune équipe trouvée</p>
+    </div>
+  </div>
+</div>
