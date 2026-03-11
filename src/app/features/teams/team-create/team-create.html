@@ -1,0 +1,54 @@
+<div class="team-create">
+  <a class="back-link" routerLink="/teams"><mat-icon>arrow_back</mat-icon> Retour aux équipes</a>
+
+  <div class="page-header">
+    <h1 class="page-title">Créer une équipe</h1>
+    <p class="page-sub">Donnez un nom à l'équipe et sélectionnez les étudiants membres</p>
+  </div>
+
+  <div class="create-layout">
+    <div class="form-card">
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        <!-- Nom -->
+        <div class="field-group" [class.field-group--error]="isInvalid('nom')">
+          <label class="field-label"><mat-icon>group</mat-icon> Nom de l'équipe *</label>
+          <div class="field-wrap">
+            <input type="text" formControlName="nom" class="field-input" placeholder="Ex : Team Alpha">
+          </div>
+          <span class="field-error" *ngIf="isInvalid('nom')">{{ getError('nom') }}</span>
+        </div>
+
+        <!-- Sélection membres -->
+        <div class="field-group">
+          <label class="field-label"><mat-icon>person_add</mat-icon> Membres ({{ selected.size }} sélectionné(s))</label>
+          <div class="student-grid">
+            <div *ngFor="let s of students"
+                 class="student-item" [class.student-item--selected]="isSelected(s.id)"
+                 (click)="toggle(s.id)">
+              <div class="student-avatar">{{ initials(s.nom) }}</div>
+              <div class="student-info">
+                <span class="student-name">{{ s.nom }}</span>
+                <span class="student-email">{{ s.email }}</span>
+              </div>
+              <mat-icon class="check-icon">{{ isSelected(s.id) ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </div>
+            <p class="no-students" *ngIf="students.length === 0">Chargement des étudiants...</p>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a class="btn-cancel" routerLink="/teams">Annuler</a>
+          <button type="submit" class="btn-submit" [disabled]="loading">
+            <span class="btn-spinner" *ngIf="loading">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+            </span>
+            <mat-icon *ngIf="!loading">group_add</mat-icon>
+            {{ loading ? 'Création...' : 'Créer l'équipe' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
