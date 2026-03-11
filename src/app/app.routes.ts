@@ -67,6 +67,14 @@ export const routes: Routes = [
         ]
       },
 
+      // ── Équipes (ADMIN) ─────────────────────────────────────────────────────
+      {
+        path: 'teams', canActivate: [roleGuard], data: { roles: ['ADMIN'] },
+        children: [
+          { path: 'create',  loadComponent: () => import('./features/teams/team-create/team-create').then(m => m.TeamCreateComponent) },
+        ]
+      },
+
       // ── Projets (ADMIN + ENCADRANT) ──────────────────
       {
         path: 'projects',

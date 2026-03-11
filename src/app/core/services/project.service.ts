@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export type StatutProjet = 'EN_ATTENTE' | 'EN_COURS' | 'TERMINE' | 'VALIDE';
@@ -56,7 +57,7 @@ export interface PageResponse<T> {
 export class ProjectService {
 
   private http = inject(HttpClient);
-  private readonly API = '/api/projects';
+  private readonly API = `${environment.apiUrl}/projects`;
 
   /** GET /api/projects?page=&size= — ADMIN, ENCADRANT */
   getAll(page = 0, size = 12): Observable<PageResponse<ProjectResponse>> {

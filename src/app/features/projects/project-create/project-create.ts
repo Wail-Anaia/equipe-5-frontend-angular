@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { environment } from '../../../../environments/environment';
 
 interface UserRef  { id: number; nom: string; email: string; }
 interface TeamRef  { id: number; nom: string; }
@@ -38,7 +39,8 @@ export class ProjectCreateComponent implements OnInit {
 
   ngOnInit(): void {
     // Charger les encadrants disponibles
-    this.http.get<any>('/api/users?role=ENCADRANT&size=100').subscribe({
+
+    this.http.get<any>(`${environment.apiUrl}/users?role=ENCADRANT&size=100`).subscribe({
       next: res => this.encadrants = (res.content ?? res) as UserRef[],
       error: ()  => this.encadrants = [
         { id:2, nom:'Prof. Karim Idrissi', email:'k.idrissi@university.ma' },
@@ -46,7 +48,8 @@ export class ProjectCreateComponent implements OnInit {
       ]
     });
     // Charger les équipes
-    this.http.get<TeamRef[]>('/api/teams').subscribe({
+
+    this.http.get<TeamRef[]>(`${environment.apiUrl}/teams`).subscribe({
       next: ts => this.teams = ts,
       error: () => this.teams = [
         { id:1, nom:'Team Alpha' },
@@ -70,7 +73,8 @@ export class ProjectCreateComponent implements OnInit {
     if (raw.encadrantId)          body['encadrantId']  = raw.encadrantId;
     if (raw.teamId)               body['teamId']       = raw.teamId;
 
-    this.http.post<{ titre: string; id: number }>('/api/projects', body).subscribe({
+
+    this.http.post<{ titre: string; id: number }>(`${environment.apiUrl}/projects`, body).subscribe({
       next: p => {
         this.loading = false;
         this.snack.open(`✅ Projet « ${p?.titre ?? raw.titre} » créé`, 'Fermer',
